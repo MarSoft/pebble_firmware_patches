@@ -1,3 +1,12 @@
+; This patch changes behaviour of the Back button
+; in watchfaces:
+; When you press it from any watchface,
+; it will launch app installed in bank 0 (the first bank).
+; You may choose which app is installed in bank0
+; by uninstalling and reinstalling apps in desired order.
+;
+; This version works with 2.0-BETA7 and BETA6, any HW version.
+
 08 4b 10 b5 04 46 18 68 08 e0 {
 	proc app_manager_get_bank_info 
 }
