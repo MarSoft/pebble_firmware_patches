@@ -40,7 +40,7 @@
 	jump 0 ret	; BEQ ret
 	CMP R0,0	;db 00 28
 	jump 1 ret	; BNE ret
-	db 00 20	; MOV R0,0 ; bank_id
+	MOV R0, 0	;db 00 20	; bank_id
 	BL app_manager_get_bank_info
 	jump 1 ret R0 ; CBZ R0, ret
 	db C0 68 ; LDR R0, [R0,#0xC]
