@@ -36,15 +36,15 @@
 ; which we replace with our continuation to previous proc.
 ?6 43 1c 0d d0 c0 b2 ? f0 {
 	proc my_code
-	CMP R3, 5	;db 05 2B
+	CMP R3,5
 	jump 0 ret	; BEQ ret
-	CMP R0,0	;db 00 28
+	CMP R0,0
 	jump 1 ret	; BNE ret
-	MOV R0, 0	;db 00 20	; bank_id
+	MOV R0,0	; bank_id
 	BL app_manager_get_bank_info
-	jump 1 ret R0 ; CBZ R0, ret
-	db C0 68 ; LDR R0, [R0,#0xC]
+	jump 1 ret R0	; CBZ R0, ret
+	db C0 68	; LDR R0, [R0,#0xC]
 	BL app_manager_launch
 	ret:
-	db 38 BD ; POP {R3-R5,PC}
+	db 38 BD	; POP {R3-R5,PC}
 }
