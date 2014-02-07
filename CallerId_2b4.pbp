@@ -1,0 +1,54 @@
+; This is a patch to fix iOS CallerID bug
+
+2D E9 F3 47 1E 46 47 4B {
+	proc setTimer
+	; args: R0 = timeout_millis, 
+	;		R1 = callback,
+	;		R2 = cb_param,
+	;		R3 = 0
+}
+
+2D E9 FF 4F 85 B0 83 46 15 00 99 46 7E D0 {
+	proc HFRE_do_send
+	; args: R0 = stackId,
+	;		R1 = [port+8],
+	;		R2 = dataLen,
+	;		R3 = pData
+}
+
+; in middle of hfre_event_callback
+A0 69 05 21 ?4 4F E0 {
+	B.W my_code
+	global continue: ; global label
+}
+
+; in place of cmdAppAvailable
+08 B5 ?4 42 1C 0C D0 C0 B2 {
+	proc my_code
+	MOV R0, 25 ; delay for 25 millis
+	LDR R1, pCallback
+	MOV R2, R4 ; in case it was screwed while calling SendCLIP
+	MOV R3, 0
+	BL setTimer
+	; now reexecute replaced instructions
+	LDR R0, [R4,0x18]
+	MOV R1, 5
+	B.W continue
+	; data block:
+	pCallback:
+	DCD callback+1
+
+	; and here is our callback
+	callback:
+	LDR R1, [R0]
+	LDR R0, [R0, 0x1C]
+	LDR R0, [R0]
+	; here R0 and R1 must be like when calling HFRE_Query.. .
+	LDR R1, [R1, 0x8]
+	MOV R2, 0x10 ; str len
+	ADR R3, szCommand
+	B.W HFRE_do_send
+	; data block:
+	szCommand:
+	DCB "AT+CSCS=\"UTF-8\"\r"
+}
