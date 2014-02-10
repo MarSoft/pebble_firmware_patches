@@ -1,0 +1,87 @@
+; This patch changes behaviour of the Back button
+; in watchfaces:
+; When you press it from any watchface,
+; it will launch app installed in bank 0 (the first bank).
+; You may choose which app is installed in bank0
+; by uninstalling and reinstalling apps in desired order.
+;
+; This version works with 2.0.0, any HW version.
+
+; just a simple mask to find named proc
+08 4b 10 b5 04 46 18 68 08 e0 {
+	proc app_manager_get_bank_info 
+}
+
+1f b5 04 46 20 b9 09 48 {
+	proc app_manager_launch 
+}
+
+2D E9 F7 4F 0C 9F 83 46 0C 46 92 46 {
+	proc new_timer_start
+}
+
+; This matches the end of watchface_button_handler proc.
+; We replace its POP {R3-R5,LR} with jump.
+;
+; About mask: '?n' means "skip n bytes"
+; (which may have different values in different builds).
+; n defaults to 1 if omitted.
+; '@' means position to which this mask will resolve
+; (defaults to first byte).
+; Here we want to match the end of proc
+; and replace only its last instruction (with alignment NOP).
+; Note that B.W takes 4 bytes, not 2.
+00 2c 0c bf 05 20 06 20 BD E8 38 40 ?4 @ 38 BD 00 BF {
+	B.W my_code
+}
+
+; And this is a cmdAppRemove proc
+; (from serial console, thus unused in normal scenario)
+; which we replace with our continuation to previous proc.
+?6 43 1c 0d d0 c0 b2 ? f0 {
+	proc my_code
+	CMP R3, 5 ; as in proc itself
+	jump 0 ret	; BEQ ret
+	CMP R0,0 ; only match Back button
+	jump 1 ret	; BNE ret
+
+	; check this it first or subsequent btn press
+	LDR R4, timer
+	LDR R3, [R4]
+	CBNZ R3, launch
+	; no timer? it is first btn press; set timer and return
+	MOV R0, ???
+	MOV R1, 500 ; timeout 500 ms
+	LDR R2, timer_handler
+	; R3 is already 0
+	BL new_timer_start
+	STR R0, R4 ; store timer id
+	B ret
+
+	; now launch app: get its info -
+	launch:
+	MOV R0,0	; 0 is bank_id
+	BL app_manager_get_bank_info
+	jump 1 ret R0 ; CBZ R0, ret ; if no such app, just return
+	LDR R0, [R0,0xC]
+	BL app_manager_launch
+
+	ret:
+	db 38 BD ; POP {R3-R5,PC}
+
+	; ---------------------------
+
+	timer_handler: ; procedure
+	PUSH {R1,LR}
+	MOV R0, 0
+	LDR R1, timer
+	STR R0, [R1]
+	POP {R1,PC}
+
+	; ---------------------------
+
+	; data block
+	ALIGN 4
+	timer:
+	DCD 0x20000000 ; FIXME: memory location for click counter
+}
