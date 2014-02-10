@@ -71,7 +71,7 @@
 	launch:
 	MOV R0,0	; 0 is bank_id
 	BL app_manager_get_bank_info
-	jump 1 ret R0 ; CBZ R0, ret ; if no such app, just return
+	CBZ R0, ret ; if no such app, just return
 	LDR R0, [R0,0xC] ; get app id from bank info
 	BL app_manager_launch
 
