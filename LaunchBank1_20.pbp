@@ -43,7 +43,7 @@
 	MOV R0,0	; bank_id
 	BL app_manager_get_bank_info
 	jump 1 ret R0 ; CBZ R0, ret
-	db C0 68 ; LDR R0, [R0,#0xC]
+	LDR R0, [R0,0xC]
 	BL app_manager_launch
 	ret:
 	db 38 BD ; POP {R3-R5,PC}
