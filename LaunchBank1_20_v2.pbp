@@ -16,8 +16,8 @@
 	proc app_manager_launch 
 }
 
-2D E9 F7 4F 0C 9F 83 46 0C 46 92 46 {
-	proc new_timer_start
+37 B5 0D 46 04 46 0D F1 02 01 01 A8 {
+	proc time_ms
 }
 
 ; This matches the end of watchface_button_handler proc.
@@ -45,25 +45,33 @@
 	CMP R0,0 ; only match Back button
 	jump 1 ret	; BNE ret
 
-	; check this it first or subsequent btn press
-	LDR R4, timer
-	LDR R3, [R4]
-	CBNZ R3, launch
-	; no timer? it is first btn press; set timer and return
-	MOV R0, ???
-	MOV R1, 500 ; timeout 500 ms
-	LDR R2, timer_handler
-	; R3 is already 0
-	BL new_timer_start
-	STR R0, R4 ; store timer id
-	B ret
+	; check if this is first or subsequent btn press
+	; logic:
+	; oldval = counter
+	; millis = time_ms(&counter, 0) // now counter contains num of seconds
+	; secs = counter // load them
+	; counter = secs*1000 + millis
+	; 
+	LDR R0, counter
+	LDR R4, [R0] ; get old counter value
+	MOV R1, 0
+	BL time_ms
+	LDR R2, counter
+	LDR R1, [R2]
+	MOV R3, 1000
+	MUL R1, R3 ; convert seconds to millis
+	ADD R0, R1 ; now R0 contains full timestamp
+	STR R0, [R2] ; update counter value
+	SUB R2, R2, R0
+	SUB R2, R2, 500 ; delay in millis
+	jump 0xA ret ; BGE ret
 
 	; now launch app: get its info -
 	launch:
 	MOV R0,0	; 0 is bank_id
 	BL app_manager_get_bank_info
 	jump 1 ret R0 ; CBZ R0, ret ; if no such app, just return
-	LDR R0, [R0,0xC]
+	LDR R0, [R0,0xC] ; get app id from bank info
 	BL app_manager_launch
 
 	ret:
@@ -71,17 +79,8 @@
 
 	; ---------------------------
 
-	timer_handler: ; procedure
-	PUSH {R1,LR}
-	MOV R0, 0
-	LDR R1, timer
-	STR R0, [R1]
-	POP {R1,PC}
-
-	; ---------------------------
-
 	; data block
 	ALIGN 4
-	timer:
+	counter:
 	DCD 0x20000000 ; FIXME: memory location for click counter
 }
