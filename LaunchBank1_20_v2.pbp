@@ -63,8 +63,9 @@
 	ADD R0, R1 ; now R0 contains full timestamp
 	STR R0, [R2] ; update counter value
 	SUB R2, R2, R0
-	SUB R2, R2, 500 ; delay in millis
-	jump 0xA ret ; BGE ret
+	MOV.W R3, 500
+	SUB R2, R2, R3 ; delay in millis
+	BGE ret
 
 	; now launch app: get its info -
 	launch:
