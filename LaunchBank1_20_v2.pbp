@@ -58,7 +58,7 @@
 	BL time_ms
 	LDR R2, counter
 	LDR R1, [R2]
-	MOV R3, 1000
+	MOV.W R3, 1000
 	MUL R1, R3 ; convert seconds to millis
 	ADD R0, R1 ; now R0 contains full timestamp
 	STR R0, [R2] ; update counter value
