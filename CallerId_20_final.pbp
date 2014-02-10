@@ -44,7 +44,15 @@
 ;}
 
 ; in place of cmdHelp
-70 B5 0E 48 8A B0 {
+; match the whole replaced part to avoid
+; hard conflicts with other patches
+; (will just fail instead of breaking things)
+70 B5 0E 48 8A B0 ?4 0D 4D 00 24 0C 26
+06 FB 04 F3 EA 18 92 68 3A B1 00 92
+02 A8 20 21 08 4A EB 58 ?4 02 E0 E8 58
+?4 01 34 5C 2C EC D1 0A B0 70 BD ?14
+
+{
 	proc my_code
 	
 	CMP R0, 64 ; only handle our specific code
