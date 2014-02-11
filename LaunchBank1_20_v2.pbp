@@ -35,10 +35,15 @@
 	B.W my_code
 }
 
-; And this is a cmdAppRemove proc
+; This is a cmdAppRemove proc
 ; (from serial console, thus unused in normal scenario)
 ; which we replace with our continuation to previous proc.
-?6 43 1c 0d d0 c0 b2 ? f0 {
+08 B5 ?4 43 1c  0d d0 c0 b2 ?4
+20 B1 00 21 ?4  03 48 00 e0 03 48 BD E8
+08 40 ?4 08 BD  ?8
+; and cmdAppAvailable (partially)
+08 B5 ?4 42 1C  07 D0 C0 B2 ?4
+{
 	proc my_code
 	CMP R3, 5 ; as in proc itself
 	jump 0 ret	; BEQ ret
@@ -46,12 +51,6 @@
 	jump 1 ret	; BNE ret
 
 	; check if this is first or subsequent btn press
-	; logic:
-	; oldval = counter
-	; millis = time_ms(&counter, 0) // now counter contains num of seconds
-	; secs = counter // load them
-	; counter = secs*1000 + millis
-	; 
 	LDR R0, counter
 	LDR R4, [R0] ; get old counter value
 	MOV R1, 0
@@ -62,10 +61,10 @@
 	MUL R1, R3 ; convert seconds to millis
 	ADD R0, R1 ; now R0 contains full timestamp
 	STR R0, [R2] ; update counter value
-	SUB R2, R2, R0
-	MOV.W R3, 500
-	SUB R2, R2, R3 ; delay in millis
-	BGE ret
+	SUB R0, R0, R4 ; calculate diff
+	MOV.W R3, 500 ; delay in millis
+	CMP R0, R3
+	BGE ret ; if diff is too large, ignore this press
 
 	; now launch app: get its info -
 	launch:
@@ -83,6 +82,6 @@
 
 	; data block
 	ALIGN 4
-	counter:
-	DCD 0x20000000 ; FIXME: memory location for click counter
+	counter: ; memory location for click counter. 
+	DCD counter_ptr ; this should be a serial console's read buffer
 }
