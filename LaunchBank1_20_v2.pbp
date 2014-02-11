@@ -20,6 +20,14 @@
 	proc time_ms
 }
 
+; This matches some SerialConsole-related proc
+; which references memory address used for serial console read buffer.
+; We will use this address to store timer value.
+08 B5 05 4B 1B 78 13 B9  3E 20 ?4 03 4B
+00 22 C3 F8 84 20 08 BD  ?4 @ {
+	val counter_ptr
+}
+
 ; This matches the end of watchface_button_handler proc.
 ; We replace its POP {R3-R5,LR} with jump.
 ;
