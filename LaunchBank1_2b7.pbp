@@ -37,12 +37,12 @@
 ?6 43 1c 0d d0 c0 b2 ? f0 {
 	proc my_code
 	CMP R3,5
-	jump 0 ret	; BEQ ret
+	BEQ ret
 	CMP R0,0
-	jump 1 ret	; BNE ret
+	BNE ret
 	MOV R0,0	; bank_id
 	BL app_manager_get_bank_info
-	jump 1 ret R0	; CBZ R0, ret
+	CBZ R0, ret
 	LDR R0, [R0,0xC]
 	BL app_manager_launch
 	ret:
