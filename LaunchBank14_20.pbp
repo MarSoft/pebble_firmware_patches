@@ -56,14 +56,13 @@
 {
 	proc my_code
 	CMP R3, 5 ; reexecute replaced code
-	BEQ ret ; nobody likes R3!=5 :)
+	BEQ retret ; nobody likes R3!=5 :)
 
 	MOV R5, R0 ; save R0 as we want to use it
 
 	; check if this is first or subsequent btn press
 	LDR R0, counter
 	LDR R4, [R0] ; get old counter value
-MOV R6, R4
 	MOV R1, 0
 	BL time_ms
 	LDR R2, counter
@@ -74,6 +73,7 @@ MOV R6, R4
 
 	; check current button
 	LDRB R0, [R5,4]
+MOV R6, R0
 	CBNZ R0, notupdate
 
 	; update counter only if this was Back btn
@@ -85,11 +85,18 @@ MOV R6, R4
 MOV R7, R1
 	MOV.W R3, 500 ; delay in millis
 	CMP R1, R3
-	BGE cont ; if diff is too large, pass this button to original proc
+	BHI cont ; if diff is too large, pass this button to original proc
 
 	; now launch app: get its info -
 	; R0 holds button id, which we use as bank id,
 	; i.e. launch app from bank 0..3 depending on button
+;debug:
+MOV R2, R7
+MOV R0, 1
+ADR R1, filename
+ADR R3, in_launch
+BL app_log
+MOV R0, R6 ; restore current btn in R0
 	BL app_manager_get_bank_info
 	;jump 1 ret R0 ;
 	CBZ R0, ret ; if no such app, just return
@@ -103,9 +110,11 @@ MOV R0, 1
 ADR R1, filename
 ADR R3, in_ret
 BL app_log
+retret:
 	db 38 BD ; POP {R3-R5,PC}
 
 	cont: ; return to original proc for it to handle this button
+  CBZ R0, ret ; original proc doesn't like Back btn anyway
 ;debug:
 MOV R2, R7
 MOV R0, 1
@@ -126,5 +135,7 @@ BL app_log
 	in_cont:
 	DCB "in_cont" 00
 	in_ret:
-	DCB "in_ret" 00
+	DCB "in_ret_" 00
+	in_launch:
+	DCB "in_launch" 00
 }
