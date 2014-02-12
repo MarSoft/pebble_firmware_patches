@@ -20,15 +20,6 @@
 	proc time_ms
 }
 
-; usage:
-; R0 = 1 (loglevel_error)
-; R1 = pszFilename
-; R2 = nLineNumber
-; R3 = pszFormat
-08 B4 F0 B5 A6 B0 2B AC {
-	proc app_log
-}
-
 ; This matches some SerialConsole-related proc
 ; which references memory address used for serial console read buffer.
 ; We will use this address to store timer value.
@@ -56,7 +47,7 @@
 {
 	proc my_code
 	CMP R3, 5 ; reexecute replaced code
-	BEQ retret ; nobody likes R3!=5 :)
+	BEQ ret; we don't need button_up events
 
 	MOV R5, R0 ; save R0 as we want to use it
 
@@ -73,7 +64,6 @@
 
 	; check current button
 	LDRB R0, [R5,4]
-MOV R6, R0
 	CBNZ R0, notupdate
 
 	; update counter only if this was Back btn
@@ -82,7 +72,6 @@ MOV R6, R0
 	; check diff
 	notupdate:
 	SUB R1, R1, R4 ; calculate diff
-MOV R7, R1
 	MOV.W R3, 500 ; delay in millis
 	CMP R1, R3
 	BHI cont ; if diff is too large, pass this button to original proc
@@ -90,13 +79,6 @@ MOV R7, R1
 	; now launch app: get its info -
 	; R0 holds button id, which we use as bank id,
 	; i.e. launch app from bank 0..3 depending on button
-;debug:
-MOV R2, R7
-MOV R0, 1
-ADR R1, filename
-ADR R3, in_launch
-BL app_log
-MOV R0, R6 ; restore current btn in R0
 	BL app_manager_get_bank_info
 	;jump 1 ret R0 ;
 	CBZ R0, ret ; if no such app, just return
@@ -104,23 +86,9 @@ MOV R0, R6 ; restore current btn in R0
 	BL app_manager_launch
 
 	ret: ; terminate proc
-;debug:
-MOV R2, R7
-MOV R0, 1
-ADR R1, filename
-ADR R3, in_ret
-BL app_log
-retret:
 	db 38 BD ; POP {R3-R5,PC}
 
 	cont: ; return to original proc for it to handle this button
-  CBZ R0, ret ; original proc doesn't like Back btn anyway
-;debug:
-MOV R2, R7
-MOV R0, 1
-ADR R1, filename
-ADR R3, in_cont
-BL app_log
 	MOV R0, R5 ; restore R0
 	B.W continue
 
@@ -130,12 +98,4 @@ BL app_log
 	ALIGN 4
 	counter: ; memory location for click counter. 
 	DCD counter_ptr ; this should be a serial console's read buffer
-	filename:
-	DCB "LaunchBank14_20" 00
-	in_cont:
-	DCB "in_cont" 00
-	in_ret:
-	DCB "in_ret_" 00
-	in_launch:
-	DCB "in_launch" 00
 }
