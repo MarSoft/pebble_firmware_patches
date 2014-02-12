@@ -20,6 +20,15 @@
 	proc time_ms
 }
 
+; usage:
+; R0 = 1 (loglevel_error)
+; R1 = pszFilename
+; R2 = nLineNumber
+; R3 = pszFormat
+08 B4 F0 B5 A6 B0 2B AC {
+	proc app_log
+}
+
 ; This matches some SerialConsole-related proc
 ; which references memory address used for serial console read buffer.
 ; We will use this address to store timer value.
@@ -54,6 +63,7 @@
 	; check if this is first or subsequent btn press
 	LDR R0, counter
 	LDR R4, [R0] ; get old counter value
+MOV R6, R4
 	MOV R1, 0
 	BL time_ms
 	LDR R2, counter
@@ -72,6 +82,7 @@
 	; check diff
 	notupdate:
 	SUB R1, R1, R4 ; calculate diff
+MOV R7, R1
 	MOV.W R3, 500 ; delay in millis
 	CMP R1, R3
 	BGE cont ; if diff is too large, pass this button to original proc
@@ -86,9 +97,21 @@
 	BL app_manager_launch
 
 	ret: ; terminate proc
+;debug:
+MOV R2, R7
+MOV R0, 1
+ADR R1, filename
+ADR R3, in_ret
+BL app_log
 	db 38 BD ; POP {R3-R5,PC}
 
 	cont: ; return to original proc for it to handle this button
+;debug:
+MOV R2, R7
+MOV R0, 1
+ADR R1, filename
+ADR R3, in_cont
+BL app_log
 	MOV R0, R5 ; restore R0
 	B.W continue
 
@@ -98,4 +121,10 @@
 	ALIGN 4
 	counter: ; memory location for click counter. 
 	DCD counter_ptr ; this should be a serial console's read buffer
+	filename:
+	DCB "LaunchBank14_20" 00
+	in_cont:
+	DCB "in_cont" 00
+	in_ret:
+	DCB "in_ret" 00
 }
