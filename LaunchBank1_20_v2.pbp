@@ -72,7 +72,7 @@
 	SUB R0, R0, R4 ; calculate diff
 	MOV.W R3, 500 ; delay in millis
 	CMP R0, R3
-	BGE ret ; if diff is too large, ignore this press
+	BHI ret ; if diff is too large, ignore this press
 
 	; now launch app: get its info -
 	launch:
