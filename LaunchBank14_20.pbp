@@ -1,9 +1,16 @@
 ; This patch changes behaviour of the Back button
 ; in watchfaces:
-; When you press it from any watchface,
-; it will launch app installed in bank 0 (the first bank).
-; You may choose which app is installed in bank0
+; If you (from any watchface)
+; press Back button and shortly after then any button,
+; it will launch an app installed in bank N,
+; where N is a button ID (Back=0, Up=1, Select=2, Down=3).
+; I.e. you can turn on backlight with Back button alone,
+; launch app0 with Back-Back,
+; launch app1 with Back-Up, app2 with Back-Select
+; and app3 with Back-Down.
+; You may choose which app is installed in which bank
 ; by uninstalling and reinstalling apps in desired order.
+; This is greatly simplified since 2.0 app with Locker.
 ;
 ; This version works with 2.0.0, any HW version.
 

@@ -1,7 +1,9 @@
 ; This patch changes behaviour of the Back button
 ; in watchfaces:
-; When you press it from any watchface,
+; When you press twice it from any watchface,
 ; it will launch app installed in bank 0 (the first bank).
+; Note that only double-press is handled;
+; double-press is counted as two presses within lesser than 500 ms.
 ; You may choose which app is installed in bank0
 ; by uninstalling and reinstalling apps in desired order.
 ;
