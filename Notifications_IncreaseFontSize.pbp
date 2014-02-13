@@ -1,0 +1,42 @@
+; This patch increases "Large" font in notifications.
+
+; Font names:
+"RESOURCE_ID_GOTHIC_14" 00 {
+	proc gothic_14
+}
+"RESOURCE_ID_GOTHIC_14_BOLD" 00 {
+	proc gothic_14_b
+}
+"RESOURCE_ID_GOTHIC_18" 00 {
+	proc gothic_18
+}
+"RESOURCE_ID_GOTHIC_18_BOLD" 00 {
+	proc gothic_18_b
+}
+"RESOURCE_ID_GOTHIC_24" 00 {
+	proc gothic_24
+}
+"RESOURCE_ID_GOTHIC_24_BOLD" 00 {
+	proc gothic_24_b
+}
+"RESOURCE_ID_GOTHIC_28" 00 {
+	proc gothic_28
+}
+"RESOURCE_ID_GOTHIC_28_BOLD" 00 {
+	proc gothic_28_b
+}
+
+; Notification fonts table: small..
+;?4
+   10 00 fe ff  ?4 04 00 00 00  ?4 04 00 00 00 ?4
+@ ; ..and large
+?4 15 00 01 00  ?4 04 00 00 00  ?4 04 00 00 00 ?4
+{
+	DCD gothic_24	; Text: default 18
+	DCD 0x10015		; ?
+	DCD gothic_28_b ; Title: default 28b
+	DCD 4			; ?
+	DCD gothic_28	; Subtitle: default 28
+	DCD 4
+	DCD gothic_24_b	; Topic: default 24b
+}
