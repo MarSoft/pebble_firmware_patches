@@ -32,6 +32,7 @@ F8 B5 00 AF 04 46 {
 ; next: BL is_vibro_disabled
 {
 	B.W my_code
+	; Skip unneeded now code to position label correctly
 	DCB "SkipSkipSkipSkipSkipSkipSkipSkip"
 	global continue:
 }
@@ -68,19 +69,19 @@ FF 7F 00 00 01 40 00 00  05 C0 00 00 05 C0 00 00
 	STR R3, [SP] ; box_2
 	LDR R3, rect_a ; box_1
 	BL graphics_draw_text
-	MOV R5, 0x88 ; hold that space from other icons
+	MOV R5, 128 ; hold that space from other icons
 	B.W continue
 
 	; data block
 	ALIGN 4
 	rect_a:
-	DCW 0x0010 ; x
+	DCW 130 ; x
 	DCW 0xFFFF ; y
 	rect_b:
-	DCW 0x0070 ; h
-	DCW 0x0010 ; w
+	DCW 14 ; w
+	DCW 16 ; h
 	fontname:
 	DCD res_id_gothic_14
 	format:
-	DCB "%d%%" 00
+	DCB "%d" 00
 }
