@@ -1,0 +1,37 @@
+; Always display current battery level in statusbar.
+;
+; Note that this patch might slightly increase battery consumption
+; (though not much more than regular watchface/app showing battery state).
+
+; This matches middle of status_bar_draw procedure,
+; the part responsible for determining desired
+; battery level icon and drawing it if needed.
+;
+; prev: launch custom drawing proc if needed
+2B 68 73 B1 20 46 00 21  ?4 14 4B 20 46
+19 68 06 22 8D 23 ?4        C0 F1 88 00
+05 46 00 E0 8D 25
+; next: BL is_vibro_disabled
+{
+	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
+	; now R0 contains a BatteryChargeState structure:
+	; 00, is_plugged, is_charging, percent
+	UXTB R0, R0 ; just throw away charging info for now
+	; now divide by 10...
+	ADD R1,R0,R0,lsl 1
+	ADD R0,R0,R1,lsl 2
+	ADD R0,R0,R1,lsl 6
+	ADD R0,R0,R1,lsl 10
+	MOV R0,R0,lsr 15
+	; Huh.
+	ADD R0, R0, 0x30 ; '0'
+	STRB R0, [SP]
+	MOV R0, 0x30
+	STRB R0, [SP,1]
+	MOV R0, '%'
+	STRB R0, [SP,2]
+	MOV R0, 0
+	STRB R0, [SP,3]
+	; now we have complete "nn%" string at [SP]
+	MOV R0, 
+}
