@@ -1,0 +1,110 @@
+; This patch allows you to remap many buttons and/or events
+; to perform user-defined actions instead of default ones.
+
+;;;;;;;;;;;;
+;;; Actions:
+
+;only compile this if LaunchApp is used somewhere
+#ifval LaunchApp
+; Usage: LaunchApp <bank-number>
+... {
+	proc LaunchApp
+}
+#endif
+
+; Usage: Vibe <pattern-ptr>
+... {
+	;proc vibes_enqueue_custom_pattern
+	proc Vibe
+}
+; predefined pulses:
+... {
+	proc vibeLong
+}
+... {
+	proc vibeShort
+}
+
+; Usage: Shutdown
+... {
+	;proc ...
+	proc Shutdown
+}
+
+; Usage: Reboot
+... {
+	;proc ...
+	proc Reboot
+}
+
+; Usage: Message <formatstring-ptr>
+;  maybe use Notification layer?
+;  or "battery low" notification's engine
+... {
+	;proc ...
+	proc Message
+}
+
+; Usage: MainMenu
+; Launches main launcher menu
+... {
+	;proc ...
+	proc MainMenu
+}
+
+; Usage: KillApp
+; Kills active watchapp and exits to launcher menu
+; ToDo: exit to active watchface?
+; ToDo: do we need this at all?
+
+; Usage: WfNext
+; Usage: WfPrev
+; Switches active watchface
+
+; Usage: None
+; this is to disable some enabled by default action
+... {
+	proc None
+	BX LR
+}
+
+;;;;;;;;;;;
+;;; Events:
+
+; Some events will pass specific numeric or smth arg,
+; while others allow to provide an arg for them.
+
+;; Watchface button presses:
+wf_back			; back btn; this disables wf_back_*
+wf_back__arg
+wf_back_any		; back -> anybutton (arg: button id)
+wf_back_any4	; back -> anybutton (arg: button id + 4)
+wf_back_long	; back -> longpress (arg: button id)
+wf_back_long4	; back -> longpress (arg: button id + 4)
+wf_long_any		; longpress (arg: button id)
+wf_long_any4	; longpress (arg: button id + 4)
+; ToDo: allow specific button mapping?
+; remap other btns:
+wf_up
+wf_up__arg
+wf_down
+wf_down__arg
+; this is dangerous!
+wf_select
+wf_select__arg
+
+;; Other events:
+app_back_long	; longpress of Back button in any watchapp
+app_back_long__arg
+
+;; Bluetooth connection:
+bt_conn_lost
+bt_conn_lost__arg
+bt_conn_restore
+bt_conn_restore__arg
+
+;; Battery low:
+batt_low_20
+batt_low_20__arg
+batt_low_10
+batt_low_10__arg
