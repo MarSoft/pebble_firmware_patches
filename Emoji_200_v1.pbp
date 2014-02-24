@@ -1,0 +1,53 @@
+; This patch makes it possible
+; to support Emoji characters in custom fonts.
+; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
+
+; inject call to our code into
+; text_resources_try_load_glyph_metadata pro
+; instead of CMP R5,0; BNE ret0
+2D E9 F0 41 0D 0C 2D 04  04 46 0F 46 16 46
+@ 00 2D 3E D1
+{
+	B.W my_code
+	global continue:
+}
+
+; and place our code instead of
+; cmdAppList:
+70 b5 a0 b0 01 24 02 ad  60 1e c0 b2 ? ? ? ?
+80 b1 86 68 29 46 30 46  ? ? ? ? 30 46 ? ?
+?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
+;cmdWindowDump:
+;10 b5 ?4 04 46  58 b1 ?4 08 b1
+;?4 20 46 ?4  bd e8 10 40 ?4 10 bd
+{
+	proc my_code
+
+	CMP R5, 0
+	BEQ cont
+	LDR R3, diff ; R3 is still unused in proc, so we can use it
+	SUB R1, R3
+	LDR R3, base
+	CMP R3, R1
+	BHI ret ; if base > char
+	ADD R3, 0x4F ; max emoji char
+	CMP R1, R3
+	BHI ret ; if > max emoji
+	
+	; Good! Now update R7 with new codepoint value
+	MOV R7, R1
+
+	cont:
+	; restore R5 to 0, as it will be expected by code
+	MOV R5, 0
+	B.W continue
+
+	ret:
+	MOV R0, 0
+	db BD E8 F0 81 ; POP.W R4-R8,PC
+
+	; data block:
+	ALIGN 4
+	diff: DCD 0x1d500
+	base: DCD 0x2100
+}
