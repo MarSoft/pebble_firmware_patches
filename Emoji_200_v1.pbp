@@ -24,7 +24,7 @@
 	proc my_code
 
 	CMP R5, 0
-	BEQ cont
+	BEQ cont ;just continue - this is not our case
 	LDR R3, diff ; R3 is still unused in proc, so we can use it
 	SUB R1, R3
 	LDR R3, base
@@ -36,10 +36,10 @@
 	
 	; Good! Now update R7 with new codepoint value
 	MOV R7, R1
+	; set R5 to 0, as it will be expected by original code
+	MOV R5, 0
 
 	cont:
-	; restore R5 to 0, as it will be expected by code
-	MOV R5, 0
 	B.W continue
 
 	ret:
