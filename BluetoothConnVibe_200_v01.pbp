@@ -1,0 +1,35 @@
+; Double-vibe when Bluetooth connection lost or restored
+; This version will only work when current watchface/app
+; have subscribed to bluetooth events
+; (e.g. watchface with bluetooth state icon,
+; or app willing to know current bluetooth state).
+
+bd e8 30 40 ?12 @ ; add end of previous proc, for disambiguation
+07 b5 04 4a 92 e8 03 00 8d e8 03 00 ?4 0e bd
+{
+	proc vibes_double_pulse
+}
+
+; in end of bluetooth_connection_service_handler
+00 79 d0 f1 01 00 38 bf 00 20
+@ 98 47 08 bd
+{
+	; was:
+	; BLX R3
+	; POP R3,PC
+
+	B.W my_code
+}
+
+; instead of cmdBleConnect:
+13 b5 06 22 0c 46 69 46  ?4 40 b1 20 46
+;buggy mask part: ?4 01 c1 18 bf  01 21 68 46 ?4 1c bd
+{
+	proc my_code
+	MOV R2,R0 ; save bt state (to implement alternating vibe patterns for On and Off events)
+	db 98 47 ;BLX R3 ; launch original handler
+
+	BL vibes_double_pulse ; vibe!
+	
+	db 08 bd ; POP R3,PC
+}
