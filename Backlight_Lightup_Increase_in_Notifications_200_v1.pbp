@@ -1,0 +1,64 @@
+; This patch increases backlight light-up time
+; from 3 to 5 seconds,
+; but only for incoming notifications.
+; Backlight time for other events (button press, shake...)
+; will remain 3 seconds.
+; PLEASE NOTE that backlight is very battery-hungry!
+; So this patch might noticeable decrease battery uptime.
+
+; in the end of notifications_handle_new_notification:
+50 30 a1 68 ?4 ?4 08 b1 ?4
+@ ?4 bd e8 10 40 ?4 10 bd {
+	; was: BL light_enable_with_timeout
+	BL my_light_enable_with_bigger_timeout
+}
+
+35 4b f7 b5 1e 68 35 4b {
+	proc light_timer_cb
+}
+2d e9 f7 4f 0c 9f 83 46 {
+	proc new_timer_start
+}
+38 b5 ?4 04 46 00 bb {
+	proc is_backlight_enabled
+}
+
+; for light_timer_id: in data block of light_do_action proc
+; it is a memory cell storing address of timer id
+b2 21 ?4 0e bd 00 bf @ ?4 {
+	; remember 4-bytes value
+	val light_timer_id_val
+}
+
+; instead of cmdNowPlaying
+30 b5 bb b0 0a ad 12 ac  02 a8 29 46 22 46 ?2
+   ?2 00 95 01 94 1a a8  80 21 03 4a 02 ab ?2
+   ?2 3b b0 30 bd 00 bf  ?4
+{
+	proc my_light_enable_with_bigger_timeout
+
+	db 00 B5 ; PUSH LR
+
+	BL is_backlight_enabled
+	CBZ R0, ret
+
+	; enable backlight
+	MOV R0, 1 ; action: turn on
+	BL light_timer_cb
+
+	; and schedule backlight off in 5 seconds:
+	LDR R0, light_timer_id
+	LDR R0, [R0]
+	MOV.W R1, 7000 ; delay
+	LDR R2, light_timer_cb_addr
+	MOV R3, 3 ; action: fade out
+	BL new_timer_start
+
+	ret:
+	db 00 BD ; POP PC
+
+	light_timer_id:
+	DCD light_timer_id_val
+	light_timer_cb_addr:
+	DCD light_timer_cb+1
+}
