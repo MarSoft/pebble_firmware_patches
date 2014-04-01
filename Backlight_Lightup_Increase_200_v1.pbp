@@ -1,5 +1,7 @@
 ; This patch increases backlight light-up time
 ; from 3 to 5 seconds.
+; PLEASE NOTE that backlight is very battery-hungry!
+; So this patch might noticeable decrease battery uptime.
 
 ; in light_enable_timer_cb:
 03 22 1a 70 04 23 00 93  2e 4b @ 40 f6 b8 31
