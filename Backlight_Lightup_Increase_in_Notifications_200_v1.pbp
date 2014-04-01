@@ -3,8 +3,11 @@
 ; but only for incoming notifications.
 ; Backlight time for other events (button press, shake...)
 ; will remain 3 seconds.
+;
 ; PLEASE NOTE that backlight is very battery-hungry!
 ; So this patch might noticeable decrease battery uptime.
+;
+; Thanks to Suzanne Schiller for the idea.
 
 ; in the end of notifications_handle_new_notification:
 50 30 a1 68 ?4 ?4 08 b1 ?4
@@ -49,7 +52,7 @@ b2 21 ?4 0e bd 00 bf @ ?4 {
 	; and schedule backlight off in 5 seconds:
 	LDR R0, light_timer_id
 	LDR R0, [R0]
-	MOV.W R1, 7000 ; delay
+	MOV.W R1, 6000 ; delay
 	LDR R2, light_timer_cb_addr
 	MOV R3, 3 ; action: fade out
 	BL new_timer_start
