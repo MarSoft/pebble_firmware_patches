@@ -1,0 +1,10 @@
+; This patch increases backlight light-up time
+; from 3 to 5 seconds.
+
+; in light_enable_timer_cb:
+03 22 1a 70 04 23 00 93  2e 4b @ 40 f6 b8 31
+{
+	; was: MOVW R1, 3000
+	; (delay for the light-off timer)
+	MOV.W R1, 5000
+}
