@@ -1,8 +1,6 @@
 ; This patch makes it possible to support
 ; Emoji characters in custom fonts.
 ; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
-;
-; This version is buggy and doesn't work.
 
 2d e9 f0 41 0d 0c 2d 04  04 46 0f 46 16 46 {
 	proc text_resources_try_load_glyph_metadata 
@@ -49,7 +47,7 @@
 ;	BEQ cont ;just continue - this is not our case (as we have valid lower character)
 	LDR R3, emoji_base
 	CMP R1, R3
-	BLS cont ; if codep < emoji_base then pass thru
+	BLE cont ; if codep < emoji_base then pass thru
 	ADD R3, 0x4F ; emoji_count
 	CMP R1, R3
 	BHI cont ; if codep > emoji_max then pass thru (will terminate)
@@ -69,6 +67,7 @@
 	; data block:
 	ALIGN 4
 	emoji_base:	DCD 0x1f600
-	new_base:	DCD 0x28
+	;new_base:	DCD 0x2100 ; "Letter-like symbols"
+	new_base:	DCD 0x28 ; "(" symbol
 }
 
