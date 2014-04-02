@@ -1,15 +1,38 @@
-; This patch makes it possible
-; to support Emoji characters in custom fonts.
+; This patch makes it possible to support
+; Emoji characters in custom fonts.
 ; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
+;
+; This version is buggy and doesn't work.
 
 ; inject call to our code into
-; text_resources_try_load_glyph_metadata pro
-; instead of CMP R5,0; BNE ret0
+; text_resources_try_load_glyph_metadata proc
 2D E9 F0 41 0D 0C 2D 04  04 46 0F 46 16 46
 @ 00 2D 3E D1
 {
-	B.W my_code
-	global continue:
+	; was:
+	;  CMP R5,0
+	;  BNE ret0
+	; At this point R1&R7 contain character code to load,
+	; and R5 is its hiword.
+	; R0,R3 - unused
+;	B.W my_code1
+	global continue1:
+	; here R7 must have charcode
+	; and R5 must be 0
+}
+
+; also inject call into
+; text_resources_try_load_glyph_bitmap proc
+34 0c 24 04 @ 00 2c 41 d1 {
+	; was:
+	;  CMP R4, 0
+	;  BNE ret0
+	; At this point:
+	;  R6 (and R1) is codep
+	;  R4 is its hiword (should be 0 to continue)
+	;  R0,R3 - unused
+;	B.W my_code2
+	global continue2:
 }
 
 ; and place our code instead of
@@ -17,37 +40,59 @@
 70 b5 a0 b0 01 24 02 ad  60 1e c0 b2 ? ? ? ?
 80 b1 86 68 29 46 30 46  ? ? ? ? 30 46 ? ?
 ?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
-;cmdWindowDump:
+; cmdWindowDump:
 ;10 b5 ?4 04 46  58 b1 ?4 08 b1
 ;?4 20 46 ?4  bd e8 10 40 ?4 10 bd
 {
-	proc my_code
+	proc my_code1
+	MOV R0, 1
+	; prepare registers...
+	MOV R3, R5 ; hiword
+	MOV R5, 0 ; for continuation: set R5 to 0, as it will be expected by original code
+	B.W begin
 
-	CMP R5, 0
-	BEQ cont ;just continue - this is not our case
+	global my_code2
+	MOV R0, 2
+	; prepare...
+	MOV R3, R4 ; hiword
+	MOV R4, 0 ; for continuation
+
+	begin:
+	; here R3 is hiword,
+	; R1 is codep
+	CMP R3, 0 ; hiword is 0?
+	BEQ cont ;just continue - this is not our case (as we have valid lower character)
 	LDR R3, diff ; R3 is still unused in proc, so we can use it
-	SUB R1, R3
+	SUB R1, R3 ; now R1 may be valid emoji
 	LDR R3, base
 	CMP R3, R1
-	BHI ret ; if base > char
+	BHI ret ; if base > char -> char was < than emoji range
 	ADD R3, 0x4F ; max emoji char
 	CMP R1, R3
 	BHI ret ; if > max emoji
 	
-	; Good! Now update R7 with new codepoint value
-	MOV R7, R1
-	; set R5 to 0, as it will be expected by original code
-	MOV R5, 0
-
 	cont:
-	B.W continue
+	CMP R0, 1
+	BNE cont2
+	MOV R7, R1 ; update R7 with new codepoint value, if changed
+	B.W continue1
+	cont2:
+	MOV R6, R1 ; update R6
+	B.W continue2
 
 	ret:
+	CMP R0, 1
+	BNE ret2
 	MOV R0, 0
 	db BD E8 F0 81 ; POP.W R4-R8,PC
+	ret2:
+	MOV R0, 0
+	db BD E8 FE 83 ; POP.W R1-R9,PC
 
 	; data block:
 	ALIGN 4
-	diff: DCD 0x1d500
-	base: DCD 0x2100
+	;diff: DCD 0x1d500 ; emoji_start - new_base
+	;base: DCD 0x2100
+	diff: DCD 0x1f5d8 ;0x1F600-0x28
+	base: DCD 0x28
 }
