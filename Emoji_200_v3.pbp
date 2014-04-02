@@ -66,8 +66,8 @@
 
 	; apply remap table...
 	ADR R3, remap_table
-	ADD R1, R3
-	LDR R1, [R1] ; now R1 is remapped
+	ADD R3, R1
+	LDRB R1, [R3] ; now R1 is remapped
 
 	LDR R3, new_base
 	ADD R1, R3
