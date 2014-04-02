@@ -67,7 +67,7 @@
 	; data block:
 	ALIGN 4
 	emoji_base:	DCD 0x1f600
-	;new_base:	DCD 0x2100 ; "Letter-like symbols"
-	new_base:	DCD 0x28 ; "(" symbol
+	new_base:	DCD 0x2100 ; "Letter-like symbols"
+	;new_base:	DCD 0x28 ; "(" symbol
 }
 
