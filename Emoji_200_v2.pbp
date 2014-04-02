@@ -1,0 +1,74 @@
+; This patch makes it possible to support
+; Emoji characters in custom fonts.
+; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
+;
+; This version is buggy and doesn't work.
+
+2d e9 f0 41 0d 0c 2d 04  04 46 0f 46 16 46 {
+	proc text_resources_try_load_glyph_metadata 
+	; was: PUSH.W R4-R8,LR
+	; here R1 is codep, R3-R8 are unused
+	B.W my_metadata
+	global cont_metadata:
+}
+
+2d e9 f7 43 05 46 0e 46  91 46 {
+	proc text_resources_try_load_glyph_bitmap
+	; was: PUSH.W R0-R2,R4-R9,LR
+	; here R1 is codep, R3-R9 are unused
+	B.W my_bitmap
+	global cont_bitmap:
+}
+
+; place our code instead of
+; cmdAppList:
+70 b5 a0 b0 01 24 02 ad  60 1e c0 b2 ? ? ? ?
+80 b1 86 68 29 46 30 46  ? ? ? ? 30 46 ? ?
+?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
+?  ?  05 E0 0C A8 50 21  05 4a 23 46 ? ? ? ?
+01 34 09 2C E0 D1 20 B0  70 BD
+00 BF ?4 ?4
+;??? cmdWindowDump:
+;10 b5 ?4 04 46  58 b1 ?4 08 b1
+;?4 20 46 ?4  bd e8 10 40 ?4 10 bd
+{
+	proc my_metadata
+	db 2d e9 f0 41 ; PUSH.W R4-R8,LR
+	MOV R4, 1
+	B.W begin
+
+	global my_bitmap:
+	db 2d e9 f7 43 ; PUSH.W R0-R2,R4-R9,LR
+	MOV R4, 0
+
+	begin:
+	; here R1 is codep,
+	; R4 is tmp
+;	db 0b 0c ; LSR R3, R1, 0x10	; R3 = hiword
+;	CMP R3, 0 ; hiword is 0?
+;	BEQ cont ;just continue - this is not our case (as we have valid lower character)
+	LDR R3, emoji_base
+	CMP R1, R3
+	BLS cont ; if codep < emoji_base then pass thru
+	ADD R3, 0x4F ; emoji_count
+	CMP R1, R3
+	BHI cont ; if codep > emoji_max then pass thru (will terminate)
+	LDR R3, emoji_base ; restore base in R3
+	SUB R1, R3 ; now R1 is emoji-char number
+	; TODO: apply conversion table here
+	LDR R3, new_base
+	ADD R1, R3
+	
+	cont:
+	CMP R4, 1
+	BNE cont2
+	B.W cont_metadata
+	cont2:
+	B.W cont_bitmap
+
+	; data block:
+	ALIGN 4
+	emoji_base:	DCD 0x1f600
+	new_base:	DCD 0x28
+}
+
