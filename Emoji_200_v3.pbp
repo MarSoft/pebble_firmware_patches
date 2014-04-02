@@ -1,0 +1,86 @@
+; This patch makes it possible to support
+; Emoji characters in custom fonts.
+; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
+
+2d e9 f0 41 0d 0c 2d 04  04 46 0f 46 16 46 {
+	proc text_resources_try_load_glyph_metadata 
+	; was: PUSH.W R4-R8,LR
+	; here R1 is codep, R3-R8 are unused
+	B.W my_metadata
+	global cont_metadata:
+}
+
+2d e9 f7 43 05 46 0e 46  91 46 {
+	proc text_resources_try_load_glyph_bitmap
+	; was: PUSH.W R0-R2,R4-R9,LR
+	; here R1 is codep, R3-R9 are unused
+	B.W my_bitmap
+	global cont_bitmap:
+}
+
+; place our code instead of
+; cmdAppList:
+70 b5 a0 b0 01 24 02 ad  60 1e c0 b2 ? ? ? ?
+80 b1 86 68 29 46 30 46  ? ? ? ? 30 46 ? ?
+?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
+?  ?  05 E0 0C A8 50 21  05 4a 23 46 ? ? ? ?
+01 34 09 2C E0 D1 20 B0  70 BD
+00 BF ?4 ?4
+; cmdAppLaunchBank:
+08 b5 ?  ?  ?  ?  41 1c  0d d0 c0 b2 ?4
+20 b1 c0 68 ?4           03 48 00 e0 03 48 bd e8
+08 40 ?  ?  ?  ?  08 bd  ?4 ?4
+{
+	proc my_metadata
+	db 2d e9 f0 41 ; PUSH.W R4-R8,LR
+	MOV R4, 1
+	B.W begin
+
+	global my_bitmap:
+	db 2d e9 f7 43 ; PUSH.W R0-R2,R4-R9,LR
+	MOV R4, 0
+
+	begin:
+	; here R1 is codep,
+	; R4 is tmp
+;	db 0b 0c ; LSR R3, R1, 0x10	; R3 = hiword
+;	CMP R3, 0 ; hiword is 0?
+;	BEQ cont ;just continue - this is not our case (as we have valid lower character)
+	LDR R3, emoji_base
+	CMP R1, R3
+	BCC cont ; if codep < emoji_base then pass thru; BCC = BLO = unsigned lesser-than
+	ADD R3, 0x4F ; emoji_count
+	CMP R1, R3
+	BHI cont ; if codep > emoji_max then pass thru (will terminate)
+	LDR R3, emoji_base ; restore base in R3
+	SUB R1, R3 ; now R1 is emoji-char number
+
+	; apply remap table...
+	ADR R3, remap_table
+	ADD R1, R3
+	LDR R1, [R1] ; now R1 is remapped
+
+	LDR R3, new_base
+	ADD R1, R3
+	
+	cont:
+	CMP R4, 1
+	BNE cont2
+	B.W cont_metadata
+	cont2:
+	B.W cont_bitmap
+
+	; data block:
+	ALIGN 4
+	emoji_base:	DCD 0x1f600
+	;new_base:	DCD 0x2100 ; "Letter-like symbols"
+	new_base:	DCD 0x28 ; "(" symbol
+
+	remap_table:
+	DCB 02 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f
+	DCB 10 11 12 13 14 15 16 17  18 19 1a 1b 1c 1d 1e 1f
+	DCB 20 21 22 23 24 25 26 27  28 29 2a 2b 2c 2d 2e 2f
+	DCB 30 31 32 33 34 35 36 37  38 39 3a 3b 3c 3d 3e 3f
+	DCB 40 41 42 43 44 45 46 47  48 49 4a 4b 4c 4d 4e 4f
+}
+
