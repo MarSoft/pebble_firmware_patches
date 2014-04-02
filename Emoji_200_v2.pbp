@@ -47,7 +47,7 @@
 ;	BEQ cont ;just continue - this is not our case (as we have valid lower character)
 	LDR R3, emoji_base
 	CMP R1, R3
-	BLE cont ; if codep < emoji_base then pass thru
+	BCC cont ; if codep < emoji_base then pass thru; BCC = BLO = unsigned lesser-than
 	ADD R3, 0x4F ; emoji_count
 	CMP R1, R3
 	BHI cont ; if codep > emoji_max then pass thru (will terminate)
