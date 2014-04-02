@@ -19,17 +19,29 @@
 }
 
 ; place our code instead of
-; cmdAppList:
-70 b5 a0 b0 01 24 02 ad  60 1e c0 b2 ? ? ? ?
-80 b1 86 68 29 46 30 46  ? ? ? ? 30 46 ? ?
-?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
-?  ?  05 E0 0C A8 50 21  05 4a 23 46 ? ? ? ?
-01 34 09 2C E0 D1 20 B0  70 BD
-00 BF ?4 ?4
-; cmdAppLaunchBank:
-08 b5 ?  ?  ?  ?  41 1c  0d d0 c0 b2 ?4
-20 b1 c0 68 ?4           03 48 00 e0 03 48 bd e8
-08 40 ?  ?  ?  ?  08 bd  ?4 ?4
+;cmdShowLog:
+01 20 08 b5 ?4 02 48 bd e8 08 40 ?4
+00 bf ?4
+;cmdWriteFlash:
+?4
+;cmdReadWord:
+00 b5 8b b0 ?4           42 1c 03 46 03 d1 06 48
+?4          06 e0 02 68  20 21 00 92 02 a8 03 4a
+?4          0b b0 00 bd
+?4 ?4
+;cmdEraseFlash:
+?4
+;cmdFormatFlash:
+?4
+;cmdDumpFlash:
+70 b5 a2 b0 0c 46 ?2     ?2    41 1c 05 46 01 d1
+15 48 05 e0 20 46 ?2     ?2    04 46 18 b9 13 48
+?4          1d e0 01 20  ?4          80 2c b4 bf
+26 46 80 26 29 46 02 a8  32 46 ?4          00 20
+4f 22 00 95 0a 49 0b 4b  ?4          00 20 02 a9
+32 46 ?4          a4 1b  35 44 e7 d1 20 46 ?2
+?2    22 b0 70 bd
+00 bf ?4 ?4 ?4 ?4
 {
 	proc my_metadata
 	db 2d e9 f0 41 ; PUSH.W R4-R8,LR
@@ -43,9 +55,6 @@
 	begin:
 	; here R1 is codep,
 	; R4 is tmp
-;	db 0b 0c ; LSR R3, R1, 0x10	; R3 = hiword
-;	CMP R3, 0 ; hiword is 0?
-;	BEQ cont ;just continue - this is not our case (as we have valid lower character)
 	LDR R3, emoji_base
 	CMP R1, R3
 	BCC cont ; if codep < emoji_base then pass thru; BCC = BLO = unsigned lesser-than
