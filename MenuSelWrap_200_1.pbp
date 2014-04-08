@@ -1,0 +1,94 @@
+; Menu Selection Wrapper patch.
+; This patch causes menu selection
+; to wrap: when user presses Up
+; on first item, the last one will be selected,
+; and so on.
+
+; point in menu_layer_set_selected_next:
+16 b1 ?4 01 e0 ?4
+@
+20 46 ?4 25 b1 20 46
+{
+	proc do_update_data
+}
+
+; in the same proc, but later
+16 b1 ?4 01 e0 ?4
+20 46 ?4 25 b1 20 46
+29 46 42 46 ?4 9d f8 25 30
+@
+db 07 09 d5
+{
+	; LDRB.W R3,[SP,0x40+iter.custom_arg_2]
+	; was:
+	; LSLS R3, R3, 0x1F
+	; BPL skip_notification
+	B.W my_code
+	global continue
+}
+
+; in place of cmdXX
+31 46 d0 f8 2c 21 98 47
+{
+	proc my_code
+	; regs available:
+	; R0-R3; R6 (after we use it), R7
+	
+	CBZ R3, must_wrap
+	B.W continue
+
+	must_wrap:
+	; check direction..
+	CBZ R6, down
+	; now R6 is unneeded
+
+	; up: wrap to last item
+	; get section id...
+	LDR R3, [R4, 0x108] ; R3 = menu_layer.get_num_sections
+	MOV R0, R4
+	LDR R1, [R4, 0x12c] ; R1 = cb_param
+	BLX R3
+	SUB R0, 1 ; last section id
+	MOV R6, R0
+;	LSL R6, 0x10 ; shift: R6[h] = section_id
+	; ...and row id
+	MOV R1, R0 ; section_id
+	MOV R0, R4
+	LDR R2, [R4, 0x12c] ; R1 = cb_param
+	LDR R3, [R4, 0x10C] ; R3 = menu_layer.get_num_rows
+	BLX R3
+	SUB R0, 1
+	ADD R6, R0
+	; now R6 contains full menuindex
+	B update
+
+	down: ; if was Down, then wrap to first item
+	MOV R6, 0 ; new menuindex
+
+	update:
+	STR R6, [R4, 0x104] ; save selected item index
+	; determine cell top (from iter? - arg2=0 means it reached end.. but not our end!) and height
+	LDR R3, [R4, 0x110] ; get_cell_height
+	CBZ R3, fixed_height
+	MOV R0, R4
+	LDR R2, sav_idx ; 0x104
+	ADD R1, R4, R2 ; ptr to saved item idx
+	LDR R2, [R4, 0x12c] ; R1 = cb_param
+	BLX R3
+	B height_ok
+	fixed_height:
+	MOV R0, 0x2C
+
+	height_ok:
+	;FIXME: let's just null cell_top for now?
+	STR R0, [R4, 0x100] ; save cell height (and probably INVALID cell top pos)
+
+	; store 1 to custom_arg_2
+	MOV R3, 1
+	STRB R3, [SP,0x25]
+	B.W do_update_data
+
+	; data block
+	ALIGN 4
+	sav_idx: DCD 0x104
+}
