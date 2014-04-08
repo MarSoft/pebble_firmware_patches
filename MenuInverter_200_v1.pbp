@@ -1,0 +1,7 @@
+; WIP
+
+
+; in middle of some MenuLayer init proc callback:
+AD F8 36 70 48 46 @ 00 21 0f fa 88 f8 {
+	MOV R1, 1 ; GColorWhite, instead of Black
+}
