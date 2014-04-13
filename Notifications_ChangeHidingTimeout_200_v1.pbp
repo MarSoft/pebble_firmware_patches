@@ -3,11 +3,8 @@
 ; After that, if no other notification received,
 ; it will be hidden and user will be returned to
 ; main watchface.
-; This patch disables that timeout,
-; so that received notification will stay on the screen
-; until user manually closes it.
-;
-; Thanks to Svein Andre Nilsen for the idea.
+; This patch increases that timeout
+; from 3 to 10 minutes.
 
 ; end of notifications_schedule_hiding function:
 10 bd 03 49 bd e8 10 40  ?4 10 bd
