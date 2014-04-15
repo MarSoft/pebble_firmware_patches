@@ -59,7 +59,7 @@
 	proc my_code
 	
 	CMP R0, 64 ; only handle our specific code
-	jump 1 ret ; BNE ret
+	BNE ret
 
 	MOV R5, R0 ; save
 
