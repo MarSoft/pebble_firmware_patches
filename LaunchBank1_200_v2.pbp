@@ -56,9 +56,9 @@
 {
 	proc my_code
 	CMP R3, 5 ; as in proc itself
-	jump 0 ret	; BEQ ret
+	BEQ ret
 	CMP R0,0 ; only match Back button
-	jump 1 ret	; BNE ret
+	BNE ret
 
 	; check if this is first or subsequent btn press
 	LDR R0, counter
@@ -80,7 +80,6 @@
 	launch:
 	MOV R0,0	; 0 is bank_id
 	BL app_manager_get_bank_info
-	;jump 1 ret R0 ;
 	CBZ R0, ret ; if no such app, just return
 	LDR R0, [R0,0xC] ; get app id from bank info
 	BL app_manager_launch
