@@ -7,7 +7,7 @@
 	; was: PUSH.W R4-R8,LR
 	; here R1 is codep, R3-R8 are unused
 	B.W my_metadata
-	global cont_metadata:
+	global cont_metadata
 }
 
 2d e9 f7 43 05 46 0e 46  91 46 {
@@ -15,7 +15,7 @@
 	; was: PUSH.W R0-R2,R4-R9,LR
 	; here R1 is codep, R3-R9 are unused
 	B.W my_bitmap
-	global cont_bitmap:
+	global cont_bitmap
 }
 
 ; place our code instead of
@@ -35,7 +35,7 @@
 	MOV R4, 1
 	B.W begin
 
-	global my_bitmap:
+	global my_bitmap
 	db 2d e9 f7 43 ; PUSH.W R0-R2,R4-R9,LR
 	MOV R4, 0
 

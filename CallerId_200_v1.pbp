@@ -14,7 +14,7 @@
 	; SUB SP,SP,0x44
 	; SUB R0,R0,2
 	B.W my_code
-	global continue: ; global label
+	global continue ; global label
 }
 
 ; in middle of HFRE_handle_OK

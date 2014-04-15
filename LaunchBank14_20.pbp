@@ -39,7 +39,7 @@
 ; We replace "CMP R3, 5 // BEQ ret" with our code:
 38 B5 03 78 @ 05 2b 2b d0  00 79 02 28 04 d0 03 28 {
 	B.W my_code
-	global continue: ; and will return here if we wouldn't like to consume button :)
+	global continue ; and will return here if we wouldn't like to consume button :)
 }
 
 ; This is a cmdAppRemove proc

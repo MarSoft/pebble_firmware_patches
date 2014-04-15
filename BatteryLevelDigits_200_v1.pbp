@@ -34,7 +34,7 @@ F8 B5 00 AF 04 46 {
 	B.W my_code
 	; Skip unneeded now code to position label correctly
 	DCB "SkipSkipSkipSkipSkipSkipSkipSkip"
-	global continue:
+	global continue
 }
 
 ; Place our code instead of "Battery almost empty" icon
