@@ -1,6 +1,6 @@
 ; This patch makes it possible to support
 ; Emoji characters in custom fonts.
-; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
+; It remaps Emoji range (0x1F6xx) to Private Use Area part (0xF6xx).
 
 2d e9 f0 41 0d 0c 2d 04  04 46 0f 46 16 46 {
 	proc text_resources_try_load_glyph_metadata 
@@ -81,8 +81,8 @@
 
 	; data block:
 	ALIGN 4
-	emoji_base:	DCD 0x1f600
-	new_base:	DCD 0x2100 ; "Letter-like symbols"
+	emoji_base:	DCD 0x1F600
+	new_base:	DCD 0xF600 ; part of "Private Use Area"
 	; or for debug:
 	;new_base:	DCD 0x28 ; "(" symbol
 
