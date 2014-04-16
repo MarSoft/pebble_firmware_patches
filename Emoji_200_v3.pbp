@@ -1,6 +1,12 @@
 ; This patch makes it possible to support
 ; Emoji characters in custom fonts.
 ; It remaps Emoji range (0x1F6xx) to Private Use Area part (0xF6xx).
+; It uses a mapping table for remap
+; (by default table changes nothing, change it according to your fonts).
+; There are two tables, main and simple.
+; Simple table will be used if patcher is called with -D simple
+; and is intended to have fewer mappings,
+; for lightweight font.
 
 2d e9 f0 41 0d 0c 2d 04  04 46 0f 46 16 46 {
 	proc text_resources_try_load_glyph_metadata 
