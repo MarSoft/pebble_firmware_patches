@@ -1,5 +1,5 @@
 ; This patch increases backlight light-up time
-; from 3 to 5 seconds,
+; from 3 to 6 seconds (by default),
 ; but only for incoming notifications.
 ; Backlight time for other events (button press, shake...)
 ; will remain 3 seconds.
@@ -8,6 +8,10 @@
 ; So this patch might noticeable decrease battery uptime.
 ;
 ; Thanks to Suzanne Schiller for the idea.
+
+; default value: 6 seconds
+#default timeout_ms 6000
+; maximum is 65 seconds (65535 ms)
 
 ; in the end of notifications_handle_new_notification:
 50 30 a1 68 ?4 ?4 08 b1 ?4
@@ -49,10 +53,10 @@ b2 21 ?4 0e bd 00 bf @ ?4 {
 	MOV R0, 1 ; action: turn on
 	BL light_timer_cb
 
-	; and schedule backlight off in 5 seconds:
+	; and schedule backlight off in 6 seconds (or what user chose):
 	LDR R0, light_timer_id
 	LDR R0, [R0]
-	MOV.W R1, 6000 ; delay
+	MOV.W R1, ${timeout_ms} ; delay
 	LDR R2, light_timer_cb_addr
 	MOV R3, 3 ; action: fade out
 	BL new_timer_start
