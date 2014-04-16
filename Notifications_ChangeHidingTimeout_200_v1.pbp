@@ -7,6 +7,8 @@
 ; from 3 minutes to given timeout, 10 minutes by default.
 
 ; New timeout to set; defaults to 600000 milliseconds, or 10 minutes
+; #default is almost equivalent to #ifndef..#define..#endif,
+; but will set value if user passed only name.
 #default timeout_ms 600000
 ; maximum is 4294967296, i.e. more than 71582 minutes
 
