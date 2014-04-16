@@ -16,7 +16,7 @@
 	; and R5 is its hiword.
 	; R0,R3 - unused
 ;	B.W my_code1
-	global continue1:
+	global continue1
 	; here R7 must have charcode
 	; and R5 must be 0
 }
@@ -32,7 +32,7 @@
 	;  R4 is its hiword (should be 0 to continue)
 	;  R0,R3 - unused
 ;	B.W my_code2
-	global continue2:
+	global continue2
 }
 
 ; and place our code instead of

@@ -3,11 +3,14 @@
 ; After that, if no other notification received,
 ; it will be hidden and user will be returned to
 ; main watchface.
-; This patch disables that timeout,
-; so that received notification will stay on the screen
-; until user manually closes it.
-;
-; Thanks to Svein Andre Nilsen for the idea.
+; This patch increases that timeout
+; from 3 minutes to given timeout, 10 minutes by default.
+
+; New timeout to set; defaults to 600000 milliseconds, or 10 minutes
+; #default is almost equivalent to #ifndef..#define..#endif,
+; but will set value if user passed only name.
+#default timeout_ms 600000
+; maximum is 4294967296, i.e. more than 71582 minutes
 
 ; end of notifications_schedule_hiding function:
 10 bd 03 49 bd e8 10 40  ?4 10 bd
@@ -17,5 +20,5 @@
 	; replace timeout with our value.
 	; default is 180000 which means 3min
 	; let's set it to 10 minutes:
-	DCD 600000
+	DCD ${timeout_ms}
 }

@@ -19,7 +19,7 @@
 ; in middle of hfre_event_callback
 A0 69 05 21 ?4 4F E0 {
 	B.W my_code
-	global continue: ; global label
+	global continue ; global label
 }
 
 ; in place of cmdAppAvailable
