@@ -1,0 +1,53 @@
+; This patch dumps all unknown char codes
+; to applog.
+
+#include includes/app_log_200.pbi
+
+2d e9 f7 43 05 46 0e 46 {
+	proc text_resources_load_glyph_bitmap
+}
+
+; in text_resources_try_load_glyph_bitmap:
+08 bd
+38 b5 04 46 15 46 @ ?4 50 b9 20 46 {
+	; PUSH R3-R5,LR
+	; MOV R4,R0
+	; MOV R5,R2
+	; @was:
+	; BL text_resources_load_glyph_bitmap
+	; CBNZ R0, 
+	B.W save_r1
+	global continue ; here will be CBNZ
+}
+
+; place our code instead of
+; cmdAppList: (will conflict with Emoji-v1)
+70 b5 a0 b0 01 24 02 ad  60 1e c0 b2 ? ? ? ?
+80 b1 86 68 29 46 30 46  ? ? ? ? 30 46 ? ?
+?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
+{
+	global save_r1
+	; save requested char code to saved-but-unused R3
+	MOV R3, R1
+	; try to load glyph
+	BL text_resources_load_glyph_bitmap
+	; loaded? okay, this char is already implemented
+	CBNZ R0, cont
+
+	; Charcode was not found. Dump it to app_log.
+	MOV R0, 0 ; loglevel: error
+	ADR R1, filename
+	MOV R2, R3 ; saved char code
+	ADR R3, format
+	BL app_log
+	MOV R0, 0 ; restore R0
+
+	cont:
+	B.W continue
+
+	; data block
+	ALIGN 4
+	filename:	DCB "unknown_char" 0
+	ALIGN 4
+	format:		DCB "<< see line number" 0
+}
