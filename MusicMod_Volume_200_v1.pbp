@@ -1,0 +1,74 @@
+; This patch changes behaviour of stock Music app.
+; Short press on up/down buttons will change volume,
+; and long press will switch tracks.
+
+#default longpress_delay_ms 200
+
+04 20 bd e8 10 40 ?4 10 bd ?4 @
+08 b5 ?4 4f f4 7a 71 {
+	proc music_app_down_click
+}
+05 20 bd e8 10 40 ?4 10 bd ?4 @
+08 b5 ?4 4f f4 7a 71 {
+	proc music_app_up_click
+}
+38 b5 04 46 ?4 00 22 4f f4 7a 71 {
+	proc music_app_select_click
+}
+
+#include includes/click_config_200.pbi
+
+; replace (full) music_app_click_config_provider proc:
+b8 b5 03 20 06 49 ?4
+      02 20 05 49 ?4
+      05 49 01 20 ?4
+bd e8 08 40 ?4
+00 bf ?4 ?4 ?4
+{
+	PUSH LR
+
+	MOV R0, 2 ; button_id_select
+	LDR R1, pSelClick
+	BL window_single_click_subscribe
+
+	MOV R0, 1 ; button_id_up
+	MOV R1, ${longpress_delay_ms}
+	LDR R2, pUpClick ; down_handler
+	MOV R3, 0 ; up_handler
+	BL window_long_click_subscribe
+
+; TODO: split here
+
+	MOV R0, 3 ; button_id_down
+	MOV R1, ${longpress_delay_ms}
+	LDR R2, pUpClick ; down_handler
+	MOV R3, 0 ; up_handler
+	BL window_long_click_subscribe
+
+	MOV R0, 1 ; button_id_up
+	ADR R1, volume_up
+	BL window_single_click_subscribe
+
+	MOV R0, 3 ; button_id_down
+	ADR R1, volume_down
+	BL window_single_click_subscribe
+
+	POP PC
+
+	; data block:
+	ALIGN 4
+	pSelClick:	DCD music_app_select_click
+	pUpClick:	DCD music_app_up_click
+	pDownClick:	DCD music_app_down_click
+
+	ALIGN 4
+
+	; proc
+	volume_up:
+	BX LR
+
+	ALIGN 4
+	; proc
+	volume_down:
+	BX LR
+}
