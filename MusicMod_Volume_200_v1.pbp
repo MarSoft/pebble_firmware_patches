@@ -37,11 +37,23 @@
 	MOV R3, 0 ; up_handler
 	BL window_long_click_subscribe
 
-; TODO: split here
+	ALIGN 4
+	pSelClick:	DCD music_app_select_click
+	pUpClick:	DCD music_app_up_click
+}
 
+; instead of cmdBleMtu:
+1f b5 20 f0 39 fe c0 b2  38 b1 ?4 10 21
+03 46 03 4a 68 46 ?4  05 b0 00 bd
+00 bf ?4
+; cmdBleScanStart:
+?4
+; cmdBleScanStop:
+?4
+{
 	MOV R0, 3 ; button_id_down
 	MOV R1, ${longpress_delay_ms}
-	LDR R2, pUpClick ; down_handler
+	LDR R2, pDownClick ; down_handler
 	MOV R3, 0 ; up_handler
 	BL window_long_click_subscribe
 
@@ -57,8 +69,6 @@
 
 	; data block:
 	ALIGN 4
-	pSelClick:	DCD music_app_select_click
-	pUpClick:	DCD music_app_up_click
 	pDownClick:	DCD music_app_down_click
 
 	ALIGN 4
