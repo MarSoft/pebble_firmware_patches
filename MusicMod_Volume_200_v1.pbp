@@ -15,8 +15,16 @@
 38 b5 04 46 ?4 00 22 4f f4 7a 71 {
 	proc music_app_select_click
 }
+0b 4b 10 b5 1b 78 04 46  02 2b 07 d0 09 49 0a 4b {
+	proc music_app_send_spp_command
+}
 
 #include includes/click_config_200.pbi
+
+; read music_app_remote_os, which is stored after music_app_main
+07 b0 bd e8 30 40 ?4 07 b0 30 bd @ ?4 {
+	val music_app_remote_os
+}
 
 ; replace (full) music_app_click_config_provider proc:
 08 b5 03 20 06 49 ?4
@@ -78,14 +86,51 @@ fe e7 00 00
 	pVolUp: DCD volume_up+1
 	pVolDown: DCD volume_down+1
 
-	ALIGN 4
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; And now our handlers ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+	;ALIGN 4
 	; proc
 	volume_up:
-	BX LR
+	MOV R3, 6 ; SPP_volume_up
+	B volume
 
-	ALIGN 4
+	;ALIGN 4
 	; proc
 	volume_down:
-	BX LR
+	MOV R3, 7 ; SPP_volume_down
+
+	volume:
+	PUSH {R4,LR}
+
+	LDR R0, pRemoteOs
+	LDRB R0, [R0]
+	CMP R0, 2
+	BNE not_droid
+
+	android: ;;;;;;;;;
+	MOV R0, R3 ; SPP command
+	POP {R4,LR}
+	B.W music_app_send_spp_command
+	; and we already returned
+	
+	not_droid:
+	CMP R0, 1
+	BNE ret
+
+	ios: ;;;;;;;;;;;;;
+#ifdef false
+	BL get_avrcp_stack
+	ADD R1, R3, 0x3B ; convert SPP command to AVRCP one
+	POP {R4,LR}
+	B.W music_app_send_avrcp_command
+#endif
+	
+	ret:
+	POP {R4,PC}
+	
+	; data:
+	ALIGN 4
+	pRemoteOs: DCD music_app_remote_os
 }
