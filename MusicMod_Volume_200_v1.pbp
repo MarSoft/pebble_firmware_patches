@@ -37,6 +37,8 @@
 	MOV R3, 0 ; up_handler
 	BL window_long_click_subscribe
 
+	B.W my_code
+
 	ALIGN 4
 	pSelClick:	DCD music_app_select_click
 	pUpClick:	DCD music_app_up_click
@@ -52,6 +54,8 @@
 ; cmdInfiniteLoop:
 fe e7 00 00
 {
+	proc my_code
+
 	MOV R0, 3 ; button_id_down
 	MOV R1, ${longpress_delay_ms}
 	LDR R2, pDownClick ; down_handler
