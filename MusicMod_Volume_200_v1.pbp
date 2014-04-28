@@ -42,14 +42,15 @@
 	pUpClick:	DCD music_app_up_click
 }
 
-; instead of cmdBleMtu:
-1f b5 20 f0 39 fe c0 b2  38 b1 ?4 10 21
-03 46 03 4a 68 46 ?4  05 b0 00 bd
-00 bf ?4
-; cmdBleScanStart:
-?4
-; cmdBleScanStop:
-?4
+; instead of cmdReset:
+00 b5 89 b0 00 21 1c 22  01 a8 ?4 08 23
+01 a8 8d f8 04 30 ?4 ?4  09 b0 00 bd
+; cmdBootPrf:
+00 b5 89 b0 00 21 1c 22  01 a8 ?4 08 23
+01 a8 8d f8 04 30 ?4 4f  f4 00 30 ?4 ?4
+09 b0 00 bd
+; cmdInfiniteLoop:
+fe e7 00 00
 {
 	MOV R0, 3 ; button_id_down
 	MOV R1, ${longpress_delay_ms}
