@@ -40,8 +40,8 @@
 	B.W my_code
 
 	ALIGN 4
-	pSelClick:	DCD music_app_select_click
-	pUpClick:	DCD music_app_up_click
+	pSelClick:	DCD music_app_select_click+1
+	pUpClick:	DCD music_app_up_click+1
 }
 
 ; instead of cmdReset:
@@ -63,18 +63,20 @@ fe e7 00 00
 	BL window_long_click_subscribe
 
 	MOV R0, 1 ; button_id_up
-	ADR R1, volume_up
+	LDR R1, pVolUp
 	BL window_single_click_subscribe
 
 	MOV R0, 3 ; button_id_down
-	ADR R1, volume_down
+	LDR R1, pVolDown
 	BL window_single_click_subscribe
 
 	POP {PC}
 
 	; data block:
 	ALIGN 4
-	pDownClick:	DCD music_app_down_click
+	pDownClick:	DCD music_app_down_click+1
+	pVolUp: DCD volume_up+1
+	pVolDown: DCD volume_down+1
 
 	ALIGN 4
 
