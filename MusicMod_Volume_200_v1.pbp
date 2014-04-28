@@ -15,8 +15,17 @@
 38 b5 04 46 ?4 00 22 4f f4 7a 71 {
 	proc music_app_select_click
 }
+; this is for android..
 0b 4b 10 b5 1b 78 04 46  02 2b 07 d0 09 49 0a 4b {
 	proc music_app_send_spp_command
+}
+; ...and these are for ios:
+50 30 02 21 ?4 ?4 ?4 @
+08 b5 ?4 bd e8 08 40 ?4 {
+	proc get_avrcp_stack
+}
+30 b5 85 b0 04 46 0d 46  ?4 90 b9 {
+	proc music_app_send_avrcp_command
 }
 
 #include includes/click_config_200.pbi
@@ -61,6 +70,8 @@
 09 b0 00 bd
 ; cmdInfiniteLoop:
 fe e7 00 00
+; cmdStuckTimer:
+07 b5 ?4 00 23 00 93 0a 21 01 4a ?4 0e bd ?4
 {
 	proc my_code
 
@@ -111,25 +122,22 @@ fe e7 00 00
 
 	android: ;;;;;;;;;
 	MOV R0, R3 ; SPP command
-	POP {R4,LR}
-	B.W music_app_send_spp_command
-	; and we already returned
-	
+	BL music_app_send_spp_command
+	B ret
+
 	not_droid:
 	CMP R0, 1
 	BNE ret
 
 	ios: ;;;;;;;;;;;;;
-#ifdef false
 	BL get_avrcp_stack
-	ADD R1, R3, 0x3B ; convert SPP command to AVRCP one
-	POP {R4,LR}
-	B.W music_app_send_avrcp_command
-#endif
-	
+	MOV R1, R3
+	ADD R1, 0x3B ; convert SPP command to AVRCP one
+	BL music_app_send_avrcp_command
+
 	ret:
 	POP {R4,PC}
-	
+
 	; data:
 	ALIGN 4
 	pRemoteOs: DCD music_app_remote_os
