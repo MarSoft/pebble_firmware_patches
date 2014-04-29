@@ -1,0 +1,187 @@
+; This patch changes behaviour of stock Music app.
+; Short press on up/down buttons will change volume,
+; and long press will switch tracks.
+;
+; Implementation details:
+; Android do support relative volume changes,
+; i.e. pressing button on watch is equivalent to
+; pressing phone's volume button.
+; But iOS only supports absolute volume control,
+; i.e. we only can send "Set volume to x %" command,
+; but not "Increase volume by X percent".
+; So we start with 50% volume and then change it.
+; We cannot know current phone's volume on iOS.
+
+#default longpress_delay_ms 250
+; iOS volume changes from 0 to 127.
+; Step 16 means 8 overal volume grades.
+#default ios_volume_step 16
+; Start with 50% volume
+#default ios_volume_start 64
+
+04 20 bd e8 10 40 ?4 10 bd ?4 @
+08 b5 ?4 4f f4 7a 71 {
+	proc music_app_down_click
+}
+05 20 bd e8 10 40 ?4 10 bd ?4 @
+08 b5 ?4 4f f4 7a 71 {
+	proc music_app_up_click
+}
+38 b5 04 46 ?4 00 22 4f f4 7a 71 {
+	proc music_app_select_click
+}
+; this is for android..
+0b 4b 10 b5 1b 78 04 46  02 2b 07 d0 09 49 0a 4b {
+	proc music_app_send_spp_command
+}
+; ...and these are for ios:
+50 30 02 21 ?4 ?4 ?4 @
+08 b5 ?4 bd e8 08 40 ?4 {
+	proc get_avrcp_stack
+}
+07 b5 7f 29 28 bf 7f 21 02 aa 02 f8 04 1d {
+	proc avrcp_volume_set
+} ; R0: stack_id, R1: volume (0..7f)
+
+#include includes/click_config_200.pbi
+
+; read music_app_remote_os, which is stored after music_app_main
+07 b0 bd e8 30 40 ?4 07 b0 30 bd @ ?4 {
+	val music_app_remote_os
+}
+; Got from LaunchBank14_20; will use next memory address.
+; This matches some SerialConsole-related proc
+; which references memory address used for serial console read buffer.
+; We will use this address to store timer value.
+08 B5 05 4B 1B 78 13 B9  3E 20 ?4 03 4B
+00 22 C3 F8 84 20 08 BD  ?4 @ ?4 {
+	val counter_ptr
+}
+
+; replace (full) music_app_click_config_provider proc:
+08 b5 03 20 06 49 ?4
+      02 20 05 49 ?4
+      05 49 01 20
+      bd e8 08 40 ?4
+00 bf ?4 ?4 ?4
+{
+	PUSH {LR}
+
+	MOV R0, 2 ; button_id_select
+	LDR R1, pSelClick
+	BL window_single_click_subscribe
+
+	MOV R0, 1 ; button_id_up
+	MOV R1, ${longpress_delay_ms}
+	LDR R2, pUpClick ; down_handler
+	MOV R3, 0 ; up_handler
+	BL window_long_click_subscribe
+
+	B.W my_code
+
+	ALIGN 4
+	pSelClick:	DCD music_app_select_click+1
+	pUpClick:	DCD music_app_up_click+1
+}
+
+; instead of cmdReset:
+00 b5 89 b0 00 21 1c 22  01 a8 ?4 08 23
+01 a8 8d f8 04 30 ?4 ?4  09 b0 00 bd
+; cmdBootPrf:
+00 b5 89 b0 00 21 1c 22  01 a8 ?4 08 23
+01 a8 8d f8 04 30 ?4 4f  f4 00 30 ?4 ?4
+09 b0 00 bd
+; cmdInfiniteLoop:
+fe e7 00 00
+; cmdStuckTimer:
+07 b5 ?4 00 23 00 93 0a 21 01 4a ?4 0e bd ?4
+; cmdAssertFail:
+07 b5 ?4 03 4a cd e9 00 01 02 48 8b 21 ?4 ?4 ?4
+{
+	proc my_code
+
+	MOV R0, 3 ; button_id_down
+	MOV R1, ${longpress_delay_ms}
+	LDR R2, pDownClick ; down_handler
+	MOV R3, 0 ; up_handler
+	BL window_long_click_subscribe
+
+	MOV R0, 1 ; button_id_up
+	LDR R1, pVolUp
+	BL window_single_click_subscribe
+
+	MOV R0, 3 ; button_id_down
+	LDR R1, pVolDown
+	BL window_single_click_subscribe
+
+	; initialize iOS default volume
+	LDR R0, pCurrVol
+	MOV R1, ${ios_volume_start}
+	STRB R1, [R0]
+
+	POP {PC}
+
+	; data block:
+	ALIGN 4
+	pDownClick:	DCD music_app_down_click+1
+	pVolUp: DCD volume_up+1
+	pVolDown: DCD volume_down+1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; And now our handlers ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	;ALIGN 4
+	; proc
+	volume_up:
+	MOV R3, 6 ; SPP_volume_up
+	B volume
+
+	;ALIGN 4
+	; proc
+	volume_down:
+	MOV R3, 7 ; SPP_volume_down
+
+	volume:
+	PUSH {R4,LR}
+
+	LDR R0, pRemoteOs
+	LDRB R0, [R0]
+	CMP R0, 2
+	BNE not_droid
+
+	android: ;;;;;;;;;
+	MOV R0, R3 ; SPP command
+	BL music_app_send_spp_command
+	B ret
+
+	not_droid:
+	CMP R0, 1
+	BNE ret
+
+	ios: ;;;;;;;;;;;;;
+	BL get_avrcp_stack
+	LDR R2, pCurrVol
+	LDRB R1, [R2]
+	UXTB R1, R1
+	SUB R3, 6 ; convert SPP command to 0/1
+	CBNZ R3, ios_voldown
+	CMP R1, 127
+	BCS ret ; if already maximum volume (or bigger: we'll have 128), return
+	ADD R1, ${ios_volume_step}
+	B ios_ok
+	ios_voldown:
+	CBZ R1, ret ; if already 0, return
+	SUB R1, ${ios_volume_step}
+	ios_ok:
+	STRB R1, [R2] ; save new volume
+	BL avrcp_volume_set
+
+	ret:
+	POP {R4,PC}
+
+	; data:
+	ALIGN 4
+	pRemoteOs: DCD music_app_remote_os
+	pCurrVol: DCD counter_ptr+4
+}
