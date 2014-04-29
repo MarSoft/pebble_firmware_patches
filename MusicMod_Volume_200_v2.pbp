@@ -95,6 +95,8 @@
 fe e7 00 00
 ; cmdStuckTimer:
 07 b5 ?4 00 23 00 93 0a 21 01 4a ?4 0e bd ?4
+; cmdAssertFail:
+07 b5 ?4 03 4a cd e9 00 01 02 48 8b 21 ?4 ?4 ?4
 {
 	proc my_code
 
@@ -113,7 +115,7 @@ fe e7 00 00
 	BL window_single_click_subscribe
 
 	; initialize iOS default volume
-	LDR R0, pCurrVol1
+	LDR R0, pCurrVol
 	MOV R1, ${ios_volume_start}
 	STRB R1, [R0]
 
@@ -124,7 +126,6 @@ fe e7 00 00
 	pDownClick:	DCD music_app_down_click+1
 	pVolUp: DCD volume_up+1
 	pVolDown: DCD volume_down+1
-	pCurrVol1: DCD counter_ptr+4
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; And now our handlers ;;
@@ -160,7 +161,7 @@ fe e7 00 00
 
 	ios: ;;;;;;;;;;;;;
 	BL get_avrcp_stack
-	LDR R2, pCurrVol2
+	LDR R2, pCurrVol
 	LDRB R1, [R2]
 	SUB R3, 6 ; convert SPP command to 0/1
 	CBNZ R3, ios_voldown
@@ -178,5 +179,5 @@ fe e7 00 00
 	; data:
 	ALIGN 4
 	pRemoteOs: DCD music_app_remote_os
-	pCurrVol2: DCD counter_ptr+4
+	pCurrVol: DCD counter_ptr+4
 }
