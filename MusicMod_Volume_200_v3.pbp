@@ -58,6 +58,11 @@
 	val counter_ptr
 }
 
+; append to the end of music_app_avrcp_service_handler, to handle volume events
+61 79 bd e8 10 40 ?4 @ 10 bd 00 00 {
+	B.W my_volume_handler
+}
+
 ; replace (full) music_app_click_config_provider proc:
 08 b5 03 20 06 49 ?4
       02 20 05 49 ?4
@@ -183,5 +188,24 @@ fe e7 00 00
 	; data:
 	ALIGN 4
 	pRemoteOs: DCD music_app_remote_os
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	global my_volume_handler
+	; here R3 is msg type,
+	; [R4,5] has msg data
+
+	CMP R3, 2
+	BNE volh_ret
+
+	; Volume changed event
+	LDRB R1, [R4,5] ; new volume
+	LDR R0, pCurrVol
+	STRB R1, [R0]
+
+	volh_ret:
+	POP {R4,PC}
+	
+	; data:
+	ALIGN 4
 	pCurrVol: DCD counter_ptr+4
 }
