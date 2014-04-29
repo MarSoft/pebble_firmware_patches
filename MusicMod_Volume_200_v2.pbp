@@ -17,7 +17,7 @@
 ; Step 16 means 8 overal volume grades.
 #default ios_volume_step 16
 ; Start with 50% volume
-#default ios_volume_start 63
+#default ios_volume_start 64
 
 04 20 bd e8 10 40 ?4 10 bd ?4 @
 08 b5 ?4 4f f4 7a 71 {
@@ -163,11 +163,15 @@ fe e7 00 00
 	BL get_avrcp_stack
 	LDR R2, pCurrVol
 	LDRB R1, [R2]
+	UXTB R1, R1
 	SUB R3, 6 ; convert SPP command to 0/1
 	CBNZ R3, ios_voldown
+	CMP R1, 127
+	BCS ret ; if already maximum volume (or bigger: we'll have 128), return
 	ADD R1, ${ios_volume_step}
 	B ios_ok
 	ios_voldown:
+	CBZ R1, ret ; if already 0, return
 	SUB R1, ${ios_volume_step}
 	ios_ok:
 	STRB R1, [R2] ; save new volume
