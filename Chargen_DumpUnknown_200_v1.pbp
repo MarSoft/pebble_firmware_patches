@@ -27,24 +27,24 @@
 ?  ?  50 21 8d e8 21 00  08 4a 0c a8 23 46 ? ?
 {
 	global save_r1
-	; save requested char code to saved-but-unused R3
-	MOV R3, R1
+	; save requested char code
+	PUSH {R1} ; save requested code to stack
+	MOV R3, R1 ; ...and to unused (but retained by proc) R3
 	; try to load glyph
 	BL text_resources_load_glyph_bitmap
 	; loaded? okay, this char is already implemented
 	CBNZ R0, cont
 
 	; Charcode was not found. Dump it to app_log.
-	PUSH {R3} ; save requested code (original R1)
-	MOV R0, 0 ; loglevel: error
+	MOV R0, 1 ; loglevel: error
 	ADR R1, filename
 	MOV R2, R3 ; saved char code
 	ADR R3, format
 	BL app_log
 	MOV R0, 0 ; restore R0 (ret code from text_resources_try_load_glyph_bitmap)
-	POP {R1} ; restore R1 (requested charcode)
 
 	cont:
+	POP {R1} ; restore R1 (requested charcode)
 	B.W continue
 
 	; data block
