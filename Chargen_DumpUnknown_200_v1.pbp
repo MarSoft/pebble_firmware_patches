@@ -35,19 +35,21 @@
 	CBNZ R0, cont
 
 	; Charcode was not found. Dump it to app_log.
+	PUSH {R3} ; save requested code (original R1)
 	MOV R0, 0 ; loglevel: error
 	ADR R1, filename
 	MOV R2, R3 ; saved char code
 	ADR R3, format
 	BL app_log
-	MOV R0, 0 ; restore R0
+	MOV R0, 0 ; restore R0 (ret code from text_resources_try_load_glyph_bitmap)
+	POP {R1} ; restore R1 (requested charcode)
 
 	cont:
 	B.W continue
 
 	; data block
 	ALIGN 4
-	filename:	DCB "unknown_char" 0
+	filename:	DCB "BadChar" 0
 	ALIGN 4
-	format:		DCB "<< see line number" 0
+	format:		DCB "<<code" 0
 }
