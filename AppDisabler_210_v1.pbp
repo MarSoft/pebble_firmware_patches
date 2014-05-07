@@ -1,8 +1,8 @@
 ; This patch allows to selectively disable
 ; certain built-in apps.
 ; For firmware 2.1.0.
-;
-; The default apps order is:
+
+; The stock order is:
 ; 1. Sliding Text Watch
 ; 2. Classic Analog
 ; 3. Simplicity
@@ -16,12 +16,14 @@
 ; 11.Getting Started	-unremovable
 ; 12.Date & Time		-unremovable
 ; Total: 7 changeable apps
-;
+
 ; Usage:
 ; Supply appcount variable (7..0)
-; and corresponding number of appN variables.
+; and corresponding number of appN variables
+; containing app names in desired order.
 ; Note that they will be arranged in reverse order!
-
+; If appcount == e.g. 6, then app7 will not be used. Etc.
+#default appcount 7
 #default app7 slidingtext
 #default app6 classicanalog
 #default app5 simplicity
@@ -29,7 +31,6 @@
 #default app3 notifications
 #default app2 alarms
 #default app1 watchfaces
-#default appcount 7
 
 ; This is app list
 "Upgraded" 00 "Removed" 00
