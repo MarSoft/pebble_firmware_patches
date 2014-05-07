@@ -63,5 +63,5 @@
 ; it is in launcher_enumerate_apps proc
 2d e9 f3 47 df f8 a4 a0  21 4e 22 4f @ 00 25 {
 	; was: MOV R5, 0
-	MOV R5, ${appcount}*4
+	MOV R5, 7-${appcount}*4 ; will be calculated in order specified, i.e. (7-appcount)*4
 }
