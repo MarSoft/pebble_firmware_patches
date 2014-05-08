@@ -29,11 +29,11 @@ F8 B5 00 AF 04 46 {
 03 4b 1b 78 13 b1 03 4b {
 	proc is_vibro_disabled
 }
-01 4b 18 78 70 47 00 bf ?4
-; and beginning of next proc, for disambiguation:
-2d e9 f0 41 11 4c 06 46
+08 b5 ?4 00 30 18 bf 01 20 08 bd
+; and for disambiguation:
+38 b5 0c 46 15 46 10 b1
 {
-	proc bluetooth_connection_service_peek
+	proc is_bluetooth_connected
 }
 1f b5 04 46 c8 68 04 2a {
 	proc status_bar_draw_icon
@@ -135,7 +135,7 @@ F8 B5 00 AF 04 46 {
 #endif
 
 #ifndef statusbar_no_bluetooth
-	BL bluetooth_connection_service_peek
+	BL is_bluetooth_connected
 	CBZ R0, no_bluetooth_conn
 
 	; do we need graphics_context_set_compositing_mode?
