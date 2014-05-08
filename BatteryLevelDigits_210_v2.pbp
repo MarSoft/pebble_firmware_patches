@@ -111,10 +111,12 @@ F8 B5 00 AF 04 46 {
 	MOV R0, R4 ; ctx
 	ADD R1, SP,16 ; text
 	MOV R3, ${battery_text_field_width}
-	ADD R3, 0x000E0000 ; height: 0xE = 14 = statusbar height
+	ADD R3, R3,0x000E0000 ; height: 0xE = 14 = statusbar height
 	STR R3, [SP] ; box_2
+	LDR R3, yminus ; y = -1
+	ADD R3, R5 ; x: offset from the right...
+	SUB R3, ${battery_text_field_width} ; ...minus field width
 	SUB R3, R5, ${battery_text_field_width} ; offset from the right - field width
-	ADD R3, 0xFFFF0000 ; y: -1
 	; now R3 is box_1
 	BL graphics_draw_text
 	SUB R5, ${battery_text_field_width} ; hold that space from other icons
@@ -149,9 +151,11 @@ F8 B5 00 AF 04 46 {
 	DCD res_id_gothic_14
 	format:
 	DCB "%d" 00
+	ALIGN 4
+	yminus:
+	DCD 0xFFFF0000
 #endif
 #ifndef statusbar_no_bluetooth
-	ALIGN 4 ; for previous DCB
 	bticon:
 	DCD icon_bluetooth
 #endif
