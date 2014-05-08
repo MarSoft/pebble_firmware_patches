@@ -29,7 +29,10 @@ F8 B5 00 AF 04 46 {
 03 4b 1b 78 13 b1 03 4b {
 	proc is_vibro_disabled
 }
-01 4b 18 78 70 47 00 bf {
+01 4b 18 78 70 47 00 bf ?4
+; and beginning of next proc, for disambiguation:
+2d e9 f0 41 11 4c 06 46
+{
 	proc bluetooth_connection_service_peek
 }
 1f b5 04 46 c8 68 04 2a {
