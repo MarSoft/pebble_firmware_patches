@@ -4,7 +4,7 @@
 ; (though not much more than regular watchface/app showing battery state).
 
 ; Options:
-; battery_icon_stock - to show stock icon (if any) in addition to percentage
+; battery_icon_no_stock - never show stock battery icon
 ; battery_no_digits - to disable digital battery level display
 ; statusbar_no_bluetooth - don't show bluetooth status icon
 #default battery_text_field_width 16 ; was: 11 (or 14 w/o field)
@@ -50,7 +50,7 @@ F8 B5 00 AF 04 46 {
 	global icon_bluetooth
 }
 
-#ifdef battery_icon_stock
+#ifdef battery_icon_no_stock
 ; This matches middle of status_bar_draw procedure,
 ; the part responsible for determining desired
 ; battery level icon and drawing it if needed.
@@ -85,7 +85,7 @@ F8 B5 00 AF 04 46 {
 {
 	proc my_code
 
-#ifdef battery_icon_stock
+#ifdef battery_icon_no_stock
 	MOV R5, 141 ; initialize offset: there was no battery icon, so just retain few pixel field
 #endif
 	; else - it was initialized when stock icon was (or wasn't) drawn
@@ -139,7 +139,7 @@ F8 B5 00 AF 04 46 {
 	no_bluetooth_conn:
 #endif
 
-#ifndef battery_icon_stock
+#ifndef battery_icon_no_stock
 	BL is_vibro_disabled ; restore overwritten code
 #endif
 	B.W continue
