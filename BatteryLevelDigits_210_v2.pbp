@@ -6,6 +6,7 @@
 ; Options:
 ; battery_icon_stock - to show stock icon (if any) in addition to percentage
 ; battery_no_digits - to disable digital battery level display
+; statusbar_no_bluetooth - don't show bluetooth status icon
 #default battery_text_field_width 16 ; was: 11 (or 14 w/o field)
 
 00 BF ?4 ?4 @
@@ -23,10 +24,23 @@ F8 B5 00 AF 04 46 {
 	proc graphics_draw_text
 }
 "RESOURCE_ID_GOTHIC_14" 00 {
-	proc res_id_gothic_14
+	global res_id_gothic_14
 }
 03 4b 1b 78 13 b1 03 4b {
 	proc is_vibro_disabled
+}
+01 4b 18 78 70 47 00 bf {
+	proc bluetooth_connection_service_peek
+}
+1f b5 04 46 c8 68 04 2a {
+	proc status_bar_draw_icon
+}
+?4 04 00 00 10 00 00 00 00 07 00 0b 00
+77 00 00 00 67 00 00 00  57 00 00 00 36 00 00 00
+55 00 00 00 63 00 00 00  55 00 00 00 36 00 00 00
+57 00 00 00 67 00 00 00  77 00 00 00
+{
+	global icon_bluetooth
 }
 
 #ifdef battery_icon_stock
@@ -100,6 +114,22 @@ F8 B5 00 AF 04 46 {
 	SUB R5, 2 ; and hold some more space (field)
 #endif
 
+#ifndef statusbar_no_bluetooth
+	BL bluetooth_connection_service_peek
+	CBZ R0, no_bluetooth_conn
+
+	; do we need graphics_context_set_compositing_mode?
+	MOV R0, R4 ; context
+	LDR R1, bticon
+	MOV R2, 6 ; icon shifted to the right
+	MOV R3, R5 ; shift value
+	BL status_bar_draw_icon
+	SUB R5, R0 ; hold icon width space
+	SUB R5, 2 ; ... and 2-pixel field
+
+	no_bluetooth_conn:
+#endif
+
 #ifndef battery_icon_stock
 	BL is_vibro_disabled ; restore overwritten code
 #endif
@@ -107,8 +137,15 @@ F8 B5 00 AF 04 46 {
 
 	; data block
 	ALIGN 4
+#ifndef battery_no_digits
 	fontname:
 	DCD res_id_gothic_14
 	format:
 	DCB "%d" 00
+#endif
+#ifndef statusbar_no_bluetooth
+	ALIGN 4 ; for previous DCB
+	bticon:
+	DCD icon_bluetooth
+#endif
 }
