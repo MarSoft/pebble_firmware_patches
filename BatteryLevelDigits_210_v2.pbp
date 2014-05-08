@@ -73,7 +73,7 @@ F8 B5 00 AF 04 46 {
 	; 00 . is_plugged . is_charging . percent
 	UXTB R0, R0 ; just throw away charging info for now
 	MOV R3, R0
-	ADD R0, SP,16 ; use buffer which was defined for app icon (FIXME: is it big enough?! anyway, it seems to be unused anymore in proc)
+	ADD R0, SP,16 ; use free space in stack (max is 0x24=36; for this string maximum is 20 chars)
 	MOV R1, 5 ; buffer size
 	ADR R2, format
 	BL snprintf
@@ -87,14 +87,15 @@ F8 B5 00 AF 04 46 {
 	STR R0, [SP,12] ; layout
 	MOV R0, R4 ; ctx
 	ADD R1, SP,16 ; text
-	BL graphics_draw_text
-	MOV R5, 128 ; hold that space from other icons
 	MOV R3, ${battery_text_field_width}
 	ADD R3, 0x000E0000 ; height: 0xE = 14 = statusbar height
 	STR R3, [SP] ; box_2
 	SUB R3, R5, ${battery_text_field_width} ; offset from the right - field width
 	ADD R3, 0xFFFF0000 # y: -1
 	; now R3 is box_1
+	BL graphics_draw_text
+	SUB R5, ${battery_text_field_width} ; hold that space from other icons
+	SUB R5, 2 ; and hold some more space (field)
 
 #ifndef battery_icon_stock
 	BL is_vibro_disabled ; restore overwritten code
