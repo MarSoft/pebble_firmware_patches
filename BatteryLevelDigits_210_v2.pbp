@@ -1,4 +1,6 @@
 ; Always display current battery level in statusbar.
+; Also displays bluetooth connection status icon.
+; It is not currently updated automatically on bt connection gain/lose.
 ;
 ; Note that this patch might slightly increase battery consumption
 ; (though not much more than regular watchface/app showing battery state).
@@ -7,7 +9,7 @@
 ; battery_icon_no_stock - never show stock battery icon
 ; battery_no_digits - to disable digital battery level display
 ; statusbar_no_bluetooth - don't show bluetooth status icon
-#default battery_text_field_width 16 ; was: 11 (or 14 w/o field)
+; statusbar_invert_bluetooth_icon_when_disconnected - always show BT icon, but invert when connection lost
 
 00 BF ?4 ?4 @
 1F B5 ?4  8D F8 00 00  C0 F3 07 23 C0 F3 07 40
@@ -37,6 +39,9 @@ F8 B5 00 AF 04 46 {
 }
 1f b5 04 46 c8 68 04 2a {
 	proc status_bar_draw_icon
+}
+90 f8 27 30 61 f3 02 03 {
+	proc graphics_context_set_compositing_mode
 }
 ; for disambiguation (as there seems to be more than one such icon):
 "Legal" 00 00
@@ -135,10 +140,20 @@ F8 B5 00 AF 04 46 {
 #endif
 
 #ifndef statusbar_no_bluetooth
+#ifndef statusbar_invert_bluetooth_icon_when_disconnected
 	BL is_bluetooth_connected
-	CBZ R0, no_bluetooth_conn
+	CBZ R0, bluetooth_end ; no connection -> no icon
+#endif
 
-	; do we need graphics_context_set_compositing_mode?
+#ifdef statusbar_invert_bluetooth_icon_when_disconnected
+	BL is_bluetooth_connected
+	MOV R1, R0 ; mode (inversion) depends on connection status
+#else
+	MOV R1, 1 ; always white-on-black
+#endif
+	MOV R0, R4
+	BL graphics_context_set_compositing_mode
+
 	MOV R0, R4 ; context
 	LDR R1, bticon
 	MOV R2, 6 ; icon shifted to the right
@@ -147,7 +162,7 @@ F8 B5 00 AF 04 46 {
 	SUB R5, R0 ; hold icon width space
 	SUB R5, 2 ; ... and 2-pixel field
 
-	no_bluetooth_conn:
+	bluetooth_end:
 #endif
 
 #ifndef battery_icon_no_stock
