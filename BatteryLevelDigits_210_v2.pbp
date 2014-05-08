@@ -107,7 +107,7 @@ F8 B5 00 AF 04 46 {
 	ADD R3, 0x000E0000 ; height: 0xE = 14 = statusbar height
 	STR R3, [SP] ; box_2
 	SUB R3, R5, ${battery_text_field_width} ; offset from the right - field width
-	ADD R3, 0xFFFF0000 # y: -1
+	ADD R3, 0xFFFF0000 ; y: -1
 	; now R3 is box_1
 	BL graphics_draw_text
 	SUB R5, ${battery_text_field_width} ; hold that space from other icons
