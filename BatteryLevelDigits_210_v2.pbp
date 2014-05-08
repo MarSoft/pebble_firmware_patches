@@ -38,6 +38,10 @@ F8 B5 00 AF 04 46 {
 1f b5 04 46 c8 68 04 2a {
 	proc status_bar_draw_icon
 }
+; for disambiguation (as there seems to be more than one such icon):
+"Legal" 00 00
+?32
+@
 ?4 04 00 00 10 00 00 00 00 07 00 0b 00
 77 00 00 00 67 00 00 00  57 00 00 00 36 00 00 00
 55 00 00 00 63 00 00 00  55 00 00 00 36 00 00 00
