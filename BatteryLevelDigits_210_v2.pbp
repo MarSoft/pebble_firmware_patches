@@ -3,6 +3,9 @@
 ; Note that this patch might slightly increase battery consumption
 ; (though not much more than regular watchface/app showing battery state).
 
+; Options:
+; battery_icon_stock - to show stock icon (if any) in addition to percentage
+
 00 BF ?4 ?4 @
 1F B5 ?4  8D F8 00 00  C0 F3 07 23 C0 F3 07 40
 8D F8 02 00 8D F8 01 30  00 9B 00 20 {
@@ -20,7 +23,11 @@ F8 B5 00 AF 04 46 {
 "RESOURCE_ID_GOTHIC_14" 00 {
 	proc res_id_gothic_14
 }
+03 4b 1b 78 13 b1 03 4b {
+	proc is_vibro_disabled
+}
 
+#ifdef battery_icon_stock
 ; This matches middle of status_bar_draw procedure,
 ; the part responsible for determining desired
 ; battery level icon and drawing it if needed.
@@ -36,10 +43,30 @@ F8 B5 00 AF 04 46 {
 	DCB "SkipSkipSkipSkipSkipSkipSkipSkip"
 	global continue
 }
+#else
+; Use the same mask, but place call after its end
+; prev: launch custom drawing proc if needed
+; here: draw battery icon if any, and place offset to R5
+2B 68 73 B1 20 46 00 21  ?4 14 4B 20 46
+19 68 06 22 8D 23 ?4        C0 F1 88 00
+05 46 00 E0 8D 25
+@ ?4
+{
+	; was: BL is_vibro_disabled
+	B.W my_code
+	global continue
+}
+#endif
 
 ; Place our code to floating block
 {
 	proc my_code
+
+#ifdef battery_icon_stock
+	MOV R5, 141 ; initialize offset: there was no battery icon, so just retain few pixel field
+#endif
+	; else - it was initialized when stock icon was (or wasn't) drawn
+
 	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
 	; now R0 contains a BatteryChargeState structure:
 	; 00 . is_plugged . is_charging . percent
@@ -64,6 +91,10 @@ F8 B5 00 AF 04 46 {
 	LDR R3, rect_a ; box_1
 	BL graphics_draw_text
 	MOV R5, 128 ; hold that space from other icons
+
+#ifndef battery_icon_stock
+	BL is_vibro_disabled ; restore overwritten code
+#endif
 	B.W continue
 
 	; data block
