@@ -5,6 +5,7 @@
 
 ; Options:
 ; battery_icon_stock - to show stock icon (if any) in addition to percentage
+; battery_no_digits - to disable digital battery level display
 #default battery_text_field_width 16 ; was: 11 (or 14 w/o field)
 
 00 BF ?4 ?4 @
@@ -68,6 +69,7 @@ F8 B5 00 AF 04 46 {
 #endif
 	; else - it was initialized when stock icon was (or wasn't) drawn
 
+#ifndef battery_no_digits
 	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
 	; now R0 contains a BatteryChargeState structure:
 	; 00 . is_plugged . is_charging . percent
@@ -96,6 +98,7 @@ F8 B5 00 AF 04 46 {
 	BL graphics_draw_text
 	SUB R5, ${battery_text_field_width} ; hold that space from other icons
 	SUB R5, 2 ; and hold some more space (field)
+#endif
 
 #ifndef battery_icon_stock
 	BL is_vibro_disabled ; restore overwritten code
