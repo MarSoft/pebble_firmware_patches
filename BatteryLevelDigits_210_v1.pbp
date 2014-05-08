@@ -1,0 +1,81 @@
+; Always display current battery level in statusbar.
+;
+; Note that this patch might slightly increase battery consumption
+; (though not much more than regular watchface/app showing battery state).
+
+00 BF ?4 ?4 @
+1F B5 ?4  8D F8 00 00  C0 F3 07 23 C0 F3 07 40
+8D F8 02 00 8D F8 01 30  00 9B 00 20 {
+	proc battery_state_service_peek
+}
+0C B4 7F B5 08 9A 05 46 {
+	proc snprintf
+}
+F8 B5 00 AF 04 46 {
+	proc fonts_get_system_font
+}
+82 B0 F0 B5 0E 46 91 B0 {
+	proc graphics_draw_text
+}
+"RESOURCE_ID_GOTHIC_14" 00 {
+	proc res_id_gothic_14
+}
+
+; This matches middle of status_bar_draw procedure,
+; the part responsible for determining desired
+; battery level icon and drawing it if needed.
+;
+; prev: launch custom drawing proc if needed
+2B 68 73 B1 20 46 00 21  ?4 14 4B 20 46
+19 68 06 22 8D 23 ?4        C0 F1 88 00
+05 46 00 E0 8D 25
+; next: BL is_vibro_disabled
+{
+	B.W my_code
+	; Skip unneeded now code to position label correctly
+	DCB "SkipSkipSkipSkipSkipSkipSkipSkip"
+	global continue
+}
+
+; Place our code to floating block
+{
+	proc my_code
+	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
+	; now R0 contains a BatteryChargeState structure:
+	; 00 . is_plugged . is_charging . percent
+	UXTB R0, R0 ; just throw away charging info for now
+	MOV R3, R0
+	ADD R0, SP,16
+	MOV R1, 5 ; buffer size
+	ADR R2, format
+	BL snprintf
+	; now we have complete "nn%" string at [SP+12]
+	LDR R0, fontname
+	BL fonts_get_system_font
+	MOV R2, R0 ; font
+	MOV R0, 0
+	STR R0, [SP,4] ; overflow_mode
+	STR R0, [SP,8] ; alignment
+	STR R0, [SP,12] ; layout
+	MOV R0, R4 ; ctx
+	ADD R1, SP,16 ; text
+	LDR R3, rect_b
+	STR R3, [SP] ; box_2
+	LDR R3, rect_a ; box_1
+	BL graphics_draw_text
+	MOV R5, 128 ; hold that space from other icons
+	B.W continue
+
+	; data block
+	ALIGN 4
+	rect_a:
+	DCW 130 ; x
+	DCW 0xFFFF ; y
+	rect_b:
+	DCW 14 ; w
+	DCW 16 ; h
+	fontname:
+	DCD res_id_gothic_14
+	format:
+	DCB "%d" 00
+}
