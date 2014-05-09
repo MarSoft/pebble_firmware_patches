@@ -114,7 +114,7 @@ F8 B5 00 AF 04 46 {
 	; now calculate text width
 	CMP R1, 100
 	BNE narrow
-	MOV R1, 16 ; text width
+	MOV R1, 18 ; text width
 	B width_ok
 	narrow:
 	MOV R1, 11 ; text width
