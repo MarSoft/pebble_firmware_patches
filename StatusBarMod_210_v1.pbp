@@ -110,7 +110,7 @@ F8 B5 00 AF 04 46 {
 #ifdef statusbar_battery_level_icon_hide_if_shock_shown
 	BNE battery_icon_end
 #else
-	BNE battery_icon_nostock
+	BEQ battery_icon_nostock
 	SUB R5, R5, 2 ; decrease stock icon's margin
 	battery_icon_nostock:
 #endif
@@ -155,7 +155,7 @@ F8 B5 00 AF 04 46 {
 	SUB R1, 9 ; ...minus right frame and margin
 	SUB R1, R0 ; ...minus rect width
 	ADD R1, R1,0x60000 ; y: 6
-	MOV R2, R0 ; width: 10 - (battery level / 10)
+	MOV R2, R0 ; width
 	ADD R2, R2,0x40000 ; height: 4
 	MOV R3, 0 ; corner_radius
 	STR R3, [SP] ; corner_mask
