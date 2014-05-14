@@ -241,7 +241,7 @@ F8 B5 00 AF 04 46 {
 	yminus:
 	DCD 0xFFFF0000
 #endif
-#ifdef statusbar_show_bluetooth_icon
+#ifdef statusbar_bluetooth_show_icon
 	bticon:
 	DCD icon_bluetooth
 #endif
