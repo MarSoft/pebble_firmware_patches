@@ -6,15 +6,15 @@
 ; (though not much more than regular watchface/app showing battery state).
 
 ; Options:
-;@battery_icon_no_stock
+;@statusbar_battery_no_stock_icon
 ; Never show stock battery icon
-;@battery_no_digits
-; Don't show battery level with number
-;@statusbar_no_bluetooth
-; Don't show bluetooth status icon
-;@statusbar_invert_bluetooth_icon_when_disconnected
-; Always show BT icon, but invert when connection lost
-; (default behaviour is to only show icon when bluetooth connection is active)
+;@statusbar_battery_level_digits
+; Show digital battery level
+;@statusbar_bluetooth_show_icon
+; Show bluetooth status icon
+; Normal if connected, inverted if disconnected
+;@statusbar_bluetooth_hide_when_disconnected
+; Only show bluetooth icon when there is bluetooth connection
 
 00 BF ?4 ?4 @
 1F B5 ?4  8D F8 00 00  C0 F3 07 23 C0 F3 07 40
@@ -60,7 +60,7 @@ F8 B5 00 AF 04 46 {
 	global icon_bluetooth
 }
 
-#ifdef battery_icon_no_stock
+#ifdef statusbar_battery_icon_no_stock
 ; This matches middle of status_bar_draw procedure,
 ; the part responsible for determining desired
 ; battery level icon and drawing it if needed.
@@ -95,12 +95,12 @@ F8 B5 00 AF 04 46 {
 {
 	proc my_code
 
-#ifdef battery_icon_no_stock
+#ifdef statusbar_battery_icon_no_stock
 	MOV R5, 141 ; initialize offset: there was no battery icon, so just retain few pixel field
 #endif
 	; else - it was initialized when stock icon was (or wasn't) drawn
 
-#ifndef battery_no_digits
+#ifdef statusbar_battery_level_digits
 	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
 	; now R0 contains a BatteryChargeState structure:
 	; 00 . is_plugged . is_charging . percent
@@ -144,13 +144,13 @@ F8 B5 00 AF 04 46 {
 	BL graphics_draw_text
 #endif
 
-#ifndef statusbar_no_bluetooth
-#ifndef statusbar_invert_bluetooth_icon_when_disconnected
+#ifdef statusbar_bluetooth_show_icon
+#ifdef statusbar_bluetooth_hide_when_disconnected
 	BL is_bluetooth_connected
 	CBZ R0, bluetooth_end ; no connection -> no icon
 #endif
 
-#ifdef statusbar_invert_bluetooth_icon_when_disconnected
+#ifndef statusbar_bluetooth_hide_when_disconnected
 	BL is_bluetooth_connected
 	MOV R1, R0 ; mode (inversion) depends on connection status
 #else
@@ -170,14 +170,14 @@ F8 B5 00 AF 04 46 {
 	bluetooth_end:
 #endif
 
-#ifndef battery_icon_no_stock
+#ifndef statusbar_battery_no_stock_icon
 	BL is_vibro_disabled ; restore overwritten code
 #endif
 	B.W continue
 
 	; data block
 	ALIGN 4
-#ifndef battery_no_digits
+#ifdef statusbar_battery_level_digits
 	fontname:
 	DCD res_id_gothic_14
 	format:
@@ -186,7 +186,7 @@ F8 B5 00 AF 04 46 {
 	yminus:
 	DCD 0xFFFF0000
 #endif
-#ifndef statusbar_no_bluetooth
+#ifdef statusbar_show_bluetooth_icon
 	bticon:
 	DCD icon_bluetooth
 #endif
