@@ -170,17 +170,18 @@ F8 B5 00 AF 04 46 {
 	; now R0 contains a BatteryChargeState structure:
 	; 00 . is_plugged . is_charging . percent
 	UXTB R0, R0 ; just throw away charging info for now
+	PUSH {R0} ; store it for later use
 	MOV R3, R0
-	ADD R0, SP,16 ; use free space in stack (max is 0x24=36; for this string maximum is 20 chars)
+	ADD R0, SP,16+4 ; use free space in stack (max is 0x24=36; for this string maximum is 20 chars)
+					; 16+4 because original 16 offset increased by 4 with our PUSH
 	MOV R1, 5 ; buffer size
 	ADR R2, format
-	PUSH {R0} ; store it for later use
 	BL snprintf
 	; now we have complete "nn%" string at [old_SP+16]
 	LDR R0, fontname
 	BL fonts_get_system_font
 	MOV R2, R0 ; font
-	POP {R1} ; restore percentage value into R1, and restore old SP value
+	POP {R1} ; restore percentage value into R1, and also restore old SP value
 	; now calculate text width
 	CMP R1, 100
 	BNE narrow
