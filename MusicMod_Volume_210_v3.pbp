@@ -12,12 +12,20 @@
 ; So we start with 50% volume and then change it.
 ; We cannot know current phone's volume on iOS.
 
-#default longpress_delay_ms 250
+; Possible options:
+;music_mimic_musicboss:
+;  this will cause stock Music app
+;  to mimic MusicBoss UUID.
+;  This should allow switching to Music app
+;  from Glance app.
+;  Note that this option will cause conflicts with MusicBoss!
+; and also these:
+#default global_longpress_delay_ms 250
 ; iOS volume changes from 0 to 127.
 ; Step 16 means 8 overal volume grades.
-#default ios_volume_step 16
+#default music_ios_volume_step 16
 ; Start with 50% volume
-#default ios_volume_start 64
+#default music_ios_volume_start 64
 
 04 20 bd e8 10 40 ?4 10 bd ?4 @
 08 b5 ?4 4f f4 7a 71 {
@@ -58,6 +66,20 @@
 	val counter_ptr
 }
 
+#ifdef music_mimic_musicboss
+; if mimicking MusicBoss, replace Music app's empty UUID
+; with MusicBoss' one:
+43 00 00 00 c7 00 00 00  cf 01 00 00 df 03 00 00 ; some Music-related icon for disambig
+@ ; our empty uuid:
+00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+18 00 00 00 ?4           00 00 00 00 ?4 ; and other parts of appinfo_music
+{
+	; change empty uuid to MusicBoss':
+	; E4168F6C-B485-4B6F-99C4-94AA957E86D5
+	db E4 16 8f 6c  b4 85  4b 6f  99 c4  94 aa 95 7e 86 d5
+}
+#endif
+
 ; append to the end of music_app_avrcp_service_handler, to handle volume events
 61 79 bd e8 10 40 ?4 @ 10 bd 00 00 {
 	B.W my_volume_handler
@@ -77,7 +99,7 @@
 	BL window_single_click_subscribe
 
 	MOV R0, 1 ; button_id_up
-	MOV R1, ${longpress_delay_ms}
+	MOV R1, ${global_longpress_delay_ms}
 	LDR R2, pUpClick ; down_handler
 	MOV R3, 0 ; up_handler
 	BL window_long_click_subscribe
@@ -94,7 +116,7 @@
 	proc my_code
 
 	MOV R0, 3 ; button_id_down
-	MOV R1, ${longpress_delay_ms}
+	MOV R1, ${global_longpress_delay_ms}
 	LDR R2, pDownClick ; down_handler
 	MOV R3, 0 ; up_handler
 	BL window_long_click_subscribe
@@ -109,7 +131,7 @@
 
 	; initialize iOS default volume
 	LDR R0, pCurrVol
-	MOV R1, ${ios_volume_start}
+	MOV R1, ${music_ios_volume_start}
 	STRB R1, [R0]
 
 	POP {PC}
@@ -161,11 +183,11 @@
 	CBNZ R3, ios_voldown
 	CMP R1, 127
 	BCS ret ; if already maximum volume (or bigger: we'll have 128), return
-	ADD R1, ${ios_volume_step}
+	ADD R1, ${music_ios_volume_step}
 	B ios_ok
 	ios_voldown:
 	CBZ R1, ret ; if already 0, return
-	SUB R1, ${ios_volume_step}
+	SUB R1, ${music_ios_volume_step}
 	ios_ok:
 	STRB R1, [R2] ; save new volume
 	BL avrcp_volume_set
