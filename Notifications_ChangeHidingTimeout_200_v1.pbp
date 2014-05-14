@@ -7,10 +7,9 @@
 ; from 3 minutes to given timeout, 10 minutes by default.
 
 ; this is an option description to be used in site interface.
-; math syntax after space controls default value, bounds and conversion:
-; default value is 10, bounds are 0..70000,
-; and option should be set to val*60000 (to convert from ms to minutes)
-;@notification_hiding_timeout_ms val(10;0..70000)*60000
+; math syntax after space controls bounds and conversion:
+; bounds are 0..70000, and option should be set to val*60000 (to convert from ms to minutes)
+;@notification_hiding_timeout_ms val(0..70000)*60000
 ; Desired notification hiding timeout.
 ; Stock default: 5 minutes.
 ;;
