@@ -50,9 +50,6 @@ F8 B5 00 AF 04 46 {
 1f b5 04 46 c8 68 04 2a {
 	proc status_bar_draw_icon
 }
-90 f8 27 30 61 f3 02 03 {
-	proc graphics_context_set_compositing_mode
-}
 ; for disambiguation (as there seems to be more than one such icon):
 "Legal" 00 00
 ?32
@@ -64,7 +61,7 @@ F8 B5 00 AF 04 46 {
 {
 	global icon_bluetooth
 }
-?4 04 00 00 10 00 00 00 00 10 00 10 00
+@ ?4 04 00 00 10 00 00 00 00 10 00 10 00
 "status_bar.c" 00
 {
 	global icon_battery_full
@@ -123,12 +120,16 @@ F8 B5 00 AF 04 46 {
 	MOV R1, 1 ; white on black
 	BL graphics_context_set_compositing_mode
 
-	; draw empty icon
+	; draw "battery full" icon
 	MOV R0, R4
 	LDR R1, pBatteryFullIcon
 	MOV R2, 6 ; shifted to right edge
 	MOV R3, R5 ; shift value
 	BL status_bar_draw_icon
+	PUSH {R5} ; store right edge value..
+	; and update shift value
+	SUB R5, R0
+	SUB R5, 3 ; and leave 3px field
 
 	MOV R0, R4
 	MOV R1, 0 ; black
@@ -149,14 +150,15 @@ F8 B5 00 AF 04 46 {
 	MOV R1, R0
 	SUB R0, R1, R0 ; now R0 has (10-R0), i.e. desired black rectangle width
 
-	MOV R1, R5 ; x: offset from right
+	; draw black rectangle over right part of the icon
+	POP {R1} ; x: restore icon's right edge value
 	SUB R1, 4 ; ...minus right frame
 	SUB R1, R0 ; ...minus battery charge in percent
-	ADD R1, R1,0x70000 ; y: 7
+	ADD R1, R1,0x60000 ; y: 6
 	MOV R2, R0 ; width: 10 - (battery level / 10)
 	ADD R2, R2,0x40000 ; height: 4
 	MOV R3, 0 ; corner_radius
-	; we don't care of corner bitmask (in stack), do we?
+	STR R3, [SP] ; corner_mask
 	MOV R0, R4 ; ctx
 	BL graphics_fill_rect
 
