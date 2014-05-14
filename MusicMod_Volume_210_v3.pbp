@@ -18,7 +18,8 @@
 ;  to mimic MusicBoss UUID.
 ;  This allows switching to Music app
 ;  from Glance app (just tell it to switch to MusicBoss).
-;  Warning: this option will cause conflicts with MusicBoss!
+;  Warning: don't use this together with MusicBoss app!
+;  Or else your watch will reboot or behave badly.
 ;  So only use it if you don't use MusicBoss at all.
 ; and also these:
 #default global_longpress_delay_ms 250
