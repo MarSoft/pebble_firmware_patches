@@ -8,8 +8,13 @@
 ; Options:
 ;@statusbar_battery_no_stock_icon
 ; Never show stock battery icon
+;wip:@statusbar_battery_level_icon
+; Show battery percentage with icon
+; (You may want to disable stock battery icon to avoid icon duplication)
+;wip:@statusbar_battery_level_icon_hide_if_shock_shown
+; Only show battery percentage icon if no stock battery icon shown
 ;@statusbar_battery_level_digits
-; Show digital battery level
+; Show digital battery percentage
 ;@statusbar_bluetooth_show_icon
 ; Show bluetooth status icon
 ; Normal if connected, inverted if disconnected
@@ -99,6 +104,49 @@ F8 B5 00 AF 04 46 {
 	MOV R5, 141 ; initialize offset: there was no battery icon, so just retain few pixel field
 #endif
 	; else - it was initialized when stock icon was (or wasn't) drawn
+
+#ifdef statusbar_battery_level_icon
+#ifdef statusbar_battery_level_icon_hide_if_shock_shown
+	CMP R5, 141 ; check offset
+	BNE battery_icon_end
+#endif
+
+	; set compositing mode (white on black)
+	MOV R0, R4
+	MOV R1, 1 ; white on black
+	BL graphics_context_set_compositing_mode
+
+	; draw empty icon
+	MOV R0, R4
+	LDR R1, pBatteryEmptyIcon
+	MOV R2, 6 ; shifted to right edge
+	MOV R3, R5 ; shift value
+	BL status_bar_draw_icon
+
+	MOV R0, R4
+	MOV R1, 1 ; white
+	BL graphics_context_set_fill_color
+
+	; get battery level
+	BL battery_state_service_peek
+	UXTB R1, R0 ; just throw away charging info [for now]
+	; divide by 10 (this method is slow but simple to code)
+	MOV R0, 0
+	divide_loop:
+	CBZ R1, batt_lev_divided
+	SUB R1, 10
+	ADD R0, 1
+	B divide_loop
+	batt_lev_divided:
+	; now R0 has batt_level/10
+
+	MOV R1, R5 ; x: offset from right
+	SUB R1, 
+	MOV R0, R4
+	BL graphics_fill_rect
+
+	battery_icon_end:
+#endif
 
 #ifdef statusbar_battery_level_digits
 	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
