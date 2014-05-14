@@ -140,19 +140,19 @@ F8 B5 00 AF 04 46 {
 	UXTB R1, R0 ; just throw away charging info [for now]
 	; divide by 10 (this method is slow but simple to code)
 	MOV R0, 0
-	CBZ R1, divide_end
 	divide_loop:
+	CBZ R1, divide_end
+	SUBS R1, 10 ; FIXME: what if R1 will not be divisible by 10?
 	ADD R0, 1
-	SUBS R1, 10
-	BHI divide_loop
+	B divide_loop
 	divide_end:
-	; now R0 has batt_level/10
-	MOV R1, R0
+	; now R0 is batt_level/10
+	MOV R1, 10
 	SUB R0, R1, R0 ; now R0 has (10-R0), i.e. desired black rectangle width
 
 	; draw black rectangle over right part of the icon
 	POP {R1} ; x: restore icon's right edge value
-	SUB R1, 11 ; ...minus right frame and margin
+	SUB R1, 5 ; ...minus right frame and margin
 	SUB R1, R0 ; ...minus rect width
 	ADD R1, R1,0x60000 ; y: 6
 	MOV R2, R0 ; width
