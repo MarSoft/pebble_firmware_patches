@@ -256,6 +256,7 @@
 	proc back_pressed
 	PUSH {LR}
 
+	MOV R0, 0 ; animated (bool)
 	BL window_stack_pop_all ; terminate app
 
 	ADR R0, uuidGlance
