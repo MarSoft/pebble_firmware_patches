@@ -64,6 +64,11 @@ F8 B5 00 AF 04 46 {
 {
 	global icon_bluetooth
 }
+?4 04 00 00 10 00 00 00 00 10 00 10 00
+"status_bar.c" 00
+{
+	global icon_battery_full
+}
 
 #ifdef statusbar_battery_icon_no_stock
 ; This matches middle of status_bar_draw procedure,
@@ -120,13 +125,13 @@ F8 B5 00 AF 04 46 {
 
 	; draw empty icon
 	MOV R0, R4
-	LDR R1, pBatteryEmptyIcon
+	LDR R1, pBatteryFullIcon
 	MOV R2, 6 ; shifted to right edge
 	MOV R3, R5 ; shift value
 	BL status_bar_draw_icon
 
 	MOV R0, R4
-	MOV R1, 1 ; white
+	MOV R1, 0 ; black
 	BL graphics_context_set_fill_color
 
 	; get battery level
@@ -141,11 +146,14 @@ F8 B5 00 AF 04 46 {
 	BHI divide_loop
 	divide_end:
 	; now R0 has batt_level/10
+	MOV R1, R0
+	SUB R0, R1, R0 ; now R0 has (10-R0), i.e. desired black rectangle width
 
 	MOV R1, R5 ; x: offset from right
-	SUB R1, 10 ; ...minus (icon width - left frame)
-	ADD R1, R1,0x10000 ; y: 1
-	MOV R2, R0 ; width: (battery level / 10)
+	SUB R1, 4 ; ...minus right frame
+	SUB R1, R0 ; ...minus battery charge in percent
+	ADD R1, R1,0x70000 ; y: 7
+	MOV R2, R0 ; width: 10 - (battery level / 10)
 	ADD R2, R2,0x40000 ; height: 4
 	MOV R3, 0 ; corner_radius
 	; we don't care of corner bitmask (in stack), do we?
@@ -246,7 +254,7 @@ F8 B5 00 AF 04 46 {
 	DCD icon_bluetooth
 #endif
 #ifdef statusbar_battery_level_icon
-	pBatteryEmptyIcon:
-	DCD icon_battery_empty
+	pBatteryFullIcon:
+	DCD icon_battery_full
 #endif
 }
