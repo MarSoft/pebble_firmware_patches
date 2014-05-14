@@ -111,7 +111,7 @@ F8 B5 00 AF 04 46 {
 	BNE battery_icon_end
 #else
 	BEQ battery_icon_nostock
-	SUB R5, R5, 2 ; decrease stock icon's margin
+	ADD R5, R5, 2 ; decrease stock icon's margin
 	battery_icon_nostock:
 #endif
 
@@ -129,7 +129,7 @@ F8 B5 00 AF 04 46 {
 	PUSH {R5} ; store right edge value..
 	; and update shift value
 	SUB R5, R0
-	SUB R5, 3 ; and leave 3px field
+	SUB R5, 3 ; and leave 3px margin
 
 	MOV R0, R4
 	MOV R1, 0 ; black
@@ -152,7 +152,7 @@ F8 B5 00 AF 04 46 {
 
 	; draw black rectangle over right part of the icon
 	POP {R1} ; x: restore icon's right edge value
-	SUB R1, 9 ; ...minus right frame and margin
+	SUB R1, 11 ; ...minus right frame and margin
 	SUB R1, R0 ; ...minus rect width
 	ADD R1, R1,0x60000 ; y: 6
 	MOV R2, R0 ; width
