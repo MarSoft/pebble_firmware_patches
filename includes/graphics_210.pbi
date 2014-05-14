@@ -20,4 +20,8 @@
 	proc graphics_fill_rect
 }
 
+82 B0 F0 B5 0E 46 91 B0 {
+	proc graphics_draw_text
+}
+
 #endif

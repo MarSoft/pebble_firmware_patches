@@ -32,9 +32,6 @@
 F8 B5 00 AF 04 46 {
 	proc fonts_get_system_font
 }
-82 B0 F0 B5 0E 46 91 B0 {
-	proc graphics_draw_text
-}
 "RESOURCE_ID_GOTHIC_14" 00 {
 	global res_id_gothic_14
 }
@@ -50,6 +47,7 @@ F8 B5 00 AF 04 46 {
 1f b5 04 46 c8 68 04 2a {
 	proc status_bar_draw_icon
 }
+#include includes/graphics_210.pbi
 ; for disambiguation (as there seems to be more than one such icon):
 "Legal" 00 00
 ?32
@@ -112,8 +110,6 @@ F8 B5 00 AF 04 46 {
 	CMP R5, 141 ; check offset
 	BNE battery_icon_end
 #endif
-
-#include includes/graphics_210.pbi
 
 	; set compositing mode (white on black)
 	MOV R0, R4
