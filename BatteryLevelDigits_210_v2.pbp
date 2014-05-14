@@ -6,10 +6,15 @@
 ; (though not much more than regular watchface/app showing battery state).
 
 ; Options:
-; battery_icon_no_stock - never show stock battery icon
-; battery_no_digits - to disable digital battery level display
-; statusbar_no_bluetooth - don't show bluetooth status icon
-; statusbar_invert_bluetooth_icon_when_disconnected - always show BT icon, but invert when connection lost
+;@battery_icon_no_stock
+; Never show stock battery icon
+;@battery_no_digits
+; Don't show battery level with number
+;@statusbar_no_bluetooth
+; Don't show bluetooth status icon
+;@statusbar_invert_bluetooth_icon_when_disconnected
+; Always show BT icon, but invert when connection lost
+; (default behaviour is to only show icon when bluetooth connection is active)
 
 00 BF ?4 ?4 @
 1F B5 ?4  8D F8 00 00  C0 F3 07 23 C0 F3 07 40

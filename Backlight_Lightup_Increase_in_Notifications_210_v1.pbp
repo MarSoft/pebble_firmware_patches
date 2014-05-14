@@ -9,9 +9,12 @@
 ;
 ; Thanks to Suzanne Schiller for the idea.
 
-; default value: 6 seconds
-#default timeout_ms 6000
-; maximum is 65 seconds (65535 ms)
+;@notification_backlight_timeout_ms val
+; This option controls backlight timeout for notifications.
+; Value is in milliseconds, i.e. 6000 ms = 6 seconds.
+; Stock default value is 3 seconds.
+; Maximum possible is 65535 ms (65 seconds)
+#default notification_backlight_timeout_ms 6000
 
 ; in the end of notifications_handle_new_notification:
 04 f1 50 00 a9 68 ?4 ?4 08 b1 ?4
@@ -60,7 +63,7 @@
 	; and schedule backlight off in 6 seconds (or what user chose):
 	LDR R0, light_timer_id
 	LDR R0, [R0]
-	MOV.W R1, ${timeout_ms} ; delay
+	MOV.W R1, ${notification_backlight_timeout_ms} ; delay
 	LDR R2, light_timer_cb_addr
 	MOV R3, 3 ; action: fade out
 	BL new_timer_start

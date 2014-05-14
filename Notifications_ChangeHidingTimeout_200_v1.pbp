@@ -6,11 +6,19 @@
 ; This patch increases that timeout
 ; from 3 minutes to given timeout, 10 minutes by default.
 
+; this is an option description to be used in site interface.
+; math syntax after space controls default value, bounds and conversion:
+; default value is 10, bounds are 0..70000,
+; and option should be set to val*60000 (to convert from ms to minutes)
+;@notification_hiding_timeout_ms val(10;0..70000)*60000
+; Desired notification hiding timeout.
+; Stock default: 5 minutes.
+;;
 ; New timeout to set; defaults to 600000 milliseconds, or 10 minutes
 ; #default is almost equivalent to #ifndef..#define..#endif,
 ; but will set value if user passed only name.
-#default timeout_ms 600000
-; maximum is 4294967296, i.e. more than 71582 minutes
+#default notification_hiding_timeout_ms 600000
+; maximum possible value is 4294967296, i.e. more than 71582 minutes
 
 ; end of notifications_schedule_hiding function:
 10 bd 03 49 bd e8 10 40  ?4 10 bd
@@ -20,5 +28,5 @@
 	; replace timeout with our value.
 	; default is 180000 which means 3min
 	; let's set it to 10 minutes:
-	DCD ${timeout_ms}
+	DCD ${notification_hiding_timeout_ms}
 }

@@ -13,20 +13,23 @@
 ; We cannot know current phone's volume on iOS.
 
 ; Possible options:
-;@music_mimic_musicboss:
-;  this will cause stock Music app
-;  to mimic MusicBoss UUID.
-;  This allows switching to Music app
-;  from Glance app (just tell it to switch to MusicBoss).
-;  Warning: don't use this together with MusicBoss app!
-;  Or else your watch will reboot or behave badly.
-;  So only use it if you don't use MusicBoss at all.
-;WIP @music_return_to_musicboss:
-;  this will cause stock Music app
-;  to (try to) launch Glance app on exit,
-;  just like MusicBoss with appropriate option enabled.
-; and also these:
+;@music_mimic_musicboss
+; this will cause stock Music app
+; to mimic MusicBoss UUID.
+; This allows switching to Music app
+; from Glance app (just tell it to switch to MusicBoss).
+; Warning: don't use this together with MusicBoss app!
+; Or else your watch will reboot or behave badly.
+; So only use it if you don't use MusicBoss at all.
+;WIP @music_return_to_musicboss
+; this will cause stock Music app
+; to (try to) launch Glance app on exit,
+; just like MusicBoss with appropriate option enabled.
+;and also these:
+;@global_longpress_delay_ms val
+; This option controls longpress delay. 250 ms means 1/4 seconds, 1000 ms means 1 second, etc.
 #default global_longpress_delay_ms 250
+;and the following options are not meant to be exposed to user:
 ; iOS volume changes from 0 to 127.
 ; Step 16 means 8 overal volume grades.
 #default music_ios_volume_step 16
