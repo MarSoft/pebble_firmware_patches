@@ -16,9 +16,10 @@
 ;music_mimic_musicboss:
 ;  this will cause stock Music app
 ;  to mimic MusicBoss UUID.
-;  This should allow switching to Music app
-;  from Glance app.
-;  Note that this option will cause conflicts with MusicBoss!
+;  This allows switching to Music app
+;  from Glance app (just tell it to switch to MusicBoss).
+;  Warning: this option will cause conflicts with MusicBoss!
+;  So only use it if you don't use MusicBoss at all.
 ; and also these:
 #default global_longpress_delay_ms 250
 ; iOS volume changes from 0 to 127.
