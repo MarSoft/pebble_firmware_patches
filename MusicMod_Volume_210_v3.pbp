@@ -142,20 +142,20 @@
 	pDownClick:	DCD music_app_down_click+1
 	pVolUp: DCD volume_up+1
 	pVolDown: DCD volume_down+1
+	pCurrVol: DCD counter_ptr+4
+}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; And now our handlers ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+{
 	;ALIGN 4
-	; proc
-	volume_up:
+	global volume_up
 	MOV R3, 6 ; SPP_volume_up
 	B volume
 
 	;ALIGN 4
-	; proc
-	volume_down:
+	global volume_down
 	MOV R3, 7 ; SPP_volume_down
 
 	volume:
@@ -199,9 +199,12 @@
 	; data:
 	ALIGN 4
 	pRemoteOs: DCD music_app_remote_os
+	pCurrVol: DCD counter_ptr+4
+}
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	global my_volume_handler
+; and yet another handler
+{
+	proc my_volume_handler
 	; here R3 is msg type,
 	; [R4,5] has msg data
 
