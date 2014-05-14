@@ -152,7 +152,7 @@ F8 B5 00 AF 04 46 {
 
 	; draw black rectangle over right part of the icon
 	POP {R1} ; x: restore icon's right edge value
-	SUB R1, 5 ; ...minus right frame and margin
+	SUB R1, 3 ; ...minus right frame
 	SUB R1, R0 ; ...minus rect width
 	ADD R1, R1,0x60000 ; y: 6
 	MOV R2, R0 ; width
