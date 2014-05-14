@@ -1,5 +1,8 @@
 ; This library defines window_*_click_subscribe functions
 
+#ifndef _click_config_h
+#define _click_config_h
+
 ; R0: button_id
 ; R1: context
 38 b5 0c 46 05 46 ?4 04 49 ?4 ?4 00 eb 85 10 {
@@ -44,3 +47,5 @@ f8 b5 05 46 0c 46 17 46 1e 46 ?4 08 49 ?4 55 b1 {
 2d e9 f0 41 04 46 0e 46 17 46 1d 46 ?4 0a 49 {
 	proc window_raw_click_subscribe
 }
+
+#endif
