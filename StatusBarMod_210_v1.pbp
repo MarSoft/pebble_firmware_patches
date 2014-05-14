@@ -111,6 +111,8 @@ F8 B5 00 AF 04 46 {
 	BNE battery_icon_end
 #endif
 
+#include includes/graphics_210.pbi
+
 	; set compositing mode (white on black)
 	MOV R0, R4
 	MOV R1, 1 ; white on black
@@ -132,17 +134,22 @@ F8 B5 00 AF 04 46 {
 	UXTB R1, R0 ; just throw away charging info [for now]
 	; divide by 10 (this method is slow but simple to code)
 	MOV R0, 0
+	CBZ R1, divide_end
 	divide_loop:
-	CBZ R1, batt_lev_divided
-	SUB R1, 10
 	ADD R0, 1
-	B divide_loop
-	batt_lev_divided:
+	SUBS R1, 10
+	BHI divide_loop
+	divide_end:
 	; now R0 has batt_level/10
 
 	MOV R1, R5 ; x: offset from right
-	SUB R1, 
-	MOV R0, R4
+	SUB R1, 10 ; ...minus (icon width - left frame)
+	ADD R1, R1,0x10000 ; y: 1
+	MOV R2, R0 ; width: (battery level / 10)
+	ADD R2, R2,0x40000 ; height: 4
+	MOV R3, 0 ; corner_radius
+	; we don't care of corner bitmask (in stack), do we?
+	MOV R0, R4 ; ctx
 	BL graphics_fill_rect
 
 	battery_icon_end:
@@ -237,5 +244,9 @@ F8 B5 00 AF 04 46 {
 #ifdef statusbar_show_bluetooth_icon
 	bticon:
 	DCD icon_bluetooth
+#endif
+#ifdef statusbar_battery_level_icon
+	pBatteryEmptyIcon:
+	DCD icon_battery_empty
 #endif
 }
