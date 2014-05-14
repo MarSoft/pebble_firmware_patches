@@ -13,7 +13,7 @@
 ; We cannot know current phone's volume on iOS.
 
 ; Possible options:
-;music_mimic_musicboss:
+;@music_mimic_musicboss:
 ;  this will cause stock Music app
 ;  to mimic MusicBoss UUID.
 ;  This allows switching to Music app
@@ -21,6 +21,10 @@
 ;  Warning: don't use this together with MusicBoss app!
 ;  Or else your watch will reboot or behave badly.
 ;  So only use it if you don't use MusicBoss at all.
+;WIP @music_return_to_musicboss:
+;  this will cause stock Music app
+;  to (try to) launch Glance app on exit,
+;  just like MusicBoss with appropriate option enabled.
 ; and also these:
 #default global_longpress_delay_ms 250
 ; iOS volume changes from 0 to 127.
@@ -131,6 +135,12 @@
 	LDR R1, pVolDown
 	BL window_single_click_subscribe
 
+#ifdef music_return_to_musicboss
+	MOV R0, 0 ; button_id_back
+	LDR R1, pBackPressed
+	BL window_single_click_subscribe
+#endif
+
 	; initialize iOS default volume
 	LDR R0, pCurrVol
 	MOV R1, ${music_ios_volume_start}
@@ -143,6 +153,9 @@
 	pDownClick:	DCD music_app_down_click+1
 	pVolUp: DCD volume_up+1
 	pVolDown: DCD volume_down+1
+#ifdef music_return_to_musicboss
+	pBackPressed: DCD back_pressed+1
+#endif
 	pCurrVol: DCD counter_ptr+4
 }
 
@@ -224,3 +237,39 @@
 	ALIGN 4
 	pCurrVol: DCD counter_ptr+4
 }
+
+#ifdef music_return_to_musicboss
+; for 2.0.x: 30 b5 85 b0 05 46 00 21  68 46 10 22 {
+38 b5 05 46 ?4 08 b1 {
+	proc app_manager_find_app_info_by_uuid
+}
+
+1f b5 04 46 20 b9 09 48 {
+	proc app_manager_launch
+}
+
+10 b5 04 46 ?4 18 b1 20 46 ?4 fa e7 {
+	proc window_stack_pop_all
+}
+
+{
+	proc back_pressed
+	PUSH {LR}
+
+	BL window_stack_pop_all ; terminate app
+
+	ADR R0, uuidGlance
+	BL app_manager_find_app_info_by_uuid
+	CBZ R0, ret ; no glance installed? -> just exit
+
+	BL app_manager_launch
+
+	ret:
+	POP {PC}
+
+	; data:
+	ALIGN 4
+	; glance UUID: 4B760064-1488-4044-967A-1B1D3AB30574
+	uuidGlance: db 4b 76 00 64  14 88  40 44  96 7a  1b 1d 3a b3 05 74
+}
+#endif
