@@ -8,14 +8,14 @@
 ; Options:
 ;@statusbar_battery_no_stock_icon
 ; Never show stock battery icon
-;@statusbar_battery_level_icon
+;@+statusbar_battery_level_icon
 ; Show battery percentage with icon
 ; (You may want to disable stock battery icon to avoid icon duplication)
-;@statusbar_battery_level_icon_hide_if_shock_shown
+;@+statusbar_battery_level_icon_hide_if_shock_shown
 ;  Only show battery percentage icon if no stock battery icon shown
 ;@statusbar_battery_level_digits
 ; Show digital battery percentage
-;@statusbar_bluetooth_show_icon
+;@+statusbar_bluetooth_show_icon
 ; Show bluetooth status icon
 ; Normal if connected, inverted if disconnected
 ;@statusbar_bluetooth_hide_when_disconnected
