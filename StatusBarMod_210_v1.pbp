@@ -11,7 +11,7 @@
 ;@+statusbar_battery_level_icon
 ; Show battery percentage with icon
 ; (You may want to disable stock battery icon to avoid icon duplication)
-;@+statusbar_battery_level_icon_hide_if_shock_shown
+;@+statusbar_battery_level_icon_hide_if_stock_shown
 ;  Only show battery percentage icon if no stock battery icon shown
 ;@statusbar_battery_level_digits
 ; Show digital battery percentage
@@ -107,7 +107,7 @@ F8 B5 00 AF 04 46 {
 
 #ifdef statusbar_battery_level_icon
 	CMP R5, 141 ; check offset
-#ifdef statusbar_battery_level_icon_hide_if_shock_shown
+#ifdef statusbar_battery_level_icon_hide_if_stock_shown
 	BNE battery_icon_end
 #else
 	BEQ battery_icon_nostock
