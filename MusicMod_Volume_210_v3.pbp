@@ -21,7 +21,7 @@
 ; Warning: don't use this together with MusicBoss app!
 ; Or else your watch will reboot or behave badly.
 ; So only use it if you don't use MusicBoss at all.
-;WIP @music_return_to_musicboss
+;WIP @music_return_to_glance
 ; this will cause stock Music app
 ; to (try to) launch Glance app on exit,
 ; just like MusicBoss with appropriate option enabled.
@@ -138,7 +138,7 @@
 	LDR R1, pVolDown
 	BL window_single_click_subscribe
 
-#ifdef music_return_to_musicboss
+#ifdef music_return_to_glance
 	MOV R0, 0 ; button_id_back
 	LDR R1, pBackPressed
 	BL window_single_click_subscribe
@@ -156,7 +156,7 @@
 	pDownClick:	DCD music_app_down_click+1
 	pVolUp: DCD volume_up+1
 	pVolDown: DCD volume_down+1
-#ifdef music_return_to_musicboss
+#ifdef music_return_to_glance
 	pBackPressed: DCD back_pressed+1
 #endif
 	pCurrVol: DCD counter_ptr+4
@@ -241,7 +241,7 @@
 	pCurrVol: DCD counter_ptr+4
 }
 
-#ifdef music_return_to_musicboss
+#ifdef music_return_to_glance
 ; for 2.0.x: 30 b5 85 b0 05 46 00 21  68 46 10 22 {
 38 b5 05 46 ?4 08 b1 {
 	proc app_manager_find_app_info_by_uuid
