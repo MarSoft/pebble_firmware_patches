@@ -1,0 +1,89 @@
+; This patch changes behaviour of the Back button
+; in watchfaces:
+; When you press twice it from any watchface,
+; it will launch app installed in bank 0 (the first bank).
+; Note that only double-press is handled;
+; double-press is counted as two presses within lesser than 500 ms.
+; You may choose which app is installed in bank0
+; by uninstalling and reinstalling apps in desired order.
+;
+; This version works with 2.0.0, any HW version.
+
+; just a simple mask to find named proc
+08 4b 10 b5 04 46 18 68 08 e0 {
+	proc app_manager_get_bank_info 
+}
+
+1f b5 04 46 30 b9 0a 48 {
+	proc app_manager_launch 
+}
+
+37 B5 0D 46 04 46 0D F1 02 01 01 A8 {
+	proc time_ms
+}
+
+; This matches some SerialConsole-related proc
+; which references memory address used for serial console read buffer.
+; We will use this address to store timer value.
+08 B5 05 4B 1B 78 13 B9  3E 20 ?4 03 4B
+00 22 C3 F8 84 20 08 BD  ?4 @ {
+	val counter_ptr
+}
+
+; This matches the end of watchface_button_handler proc.
+; We replace its POP {R3-R5,LR} with jump.
+;
+; About mask: '?n' means "skip n bytes"
+; (which may have different values in different builds).
+; n defaults to 1 if omitted.
+; '@' means position to which this mask will resolve
+; (defaults to first byte).
+; Here we want to match the end of proc
+; and replace only its last instruction (with alignment NOP).
+; Note that B.W takes 4 bytes, not 2.
+00 2c 0c bf 05 20 06 20 BD E8 38 40 ?4 @ 38 BD 00 BF {
+	B.W my_code
+}
+
+; add our code
+{
+	proc my_code
+	CMP R3, 5 ; as in proc itself
+	BEQ ret
+	CMP R0,0 ; only match Back button
+	BNE ret
+
+	; check if this is first or subsequent btn press
+	LDR R0, counter
+	LDR R4, [R0] ; get old counter value
+	MOV R1, 0
+	BL time_ms
+	LDR R2, counter
+	LDR R1, [R2]
+	MOV.W R3, 1000
+	MUL R1, R3 ; convert seconds to millis
+	ADD R0, R1 ; now R0 contains full timestamp
+	STR R0, [R2] ; update counter value
+	SUB R0, R0, R4 ; calculate diff
+	MOV.W R3, 500 ; delay in millis
+	CMP R0, R3
+	BHI ret ; if diff is too large, ignore this press
+
+	; now launch app: get its info -
+	launch:
+	MOV R0,0	; 0 is bank_id
+	BL app_manager_get_bank_info
+	CBZ R0, ret ; if no such app, just return
+	LDR R0, [R0,0xC] ; get app id from bank info
+	BL app_manager_launch
+
+	ret:
+	db 38 BD ; POP {R3-R5,PC}
+
+	; ---------------------------
+
+	; data block
+	ALIGN 4
+	counter: ; memory location for click counter. 
+	DCD counter_ptr ; this should be a serial console's read buffer
+}
