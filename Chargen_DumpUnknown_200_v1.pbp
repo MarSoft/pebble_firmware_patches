@@ -1,6 +1,6 @@
 ; This patch dumps all unknown char codes
 ; to applog.
-#define ver 200
+#ver 200
 
 #include includes/app_log_200.pbi
 

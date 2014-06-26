@@ -7,7 +7,7 @@
 ; Simple table will be used if patcher is called with -D simple
 ; and is intended to have fewer mappings,
 ; for lightweight font.
-#define ver 200
+#ver 200
 
 2d e9 f0 41 0d 0c 2d 04  04 46 0f 46 16 46 {
 	proc text_resources_try_load_glyph_metadata 

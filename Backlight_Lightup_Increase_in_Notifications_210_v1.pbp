@@ -8,7 +8,7 @@
 ; So this patch might noticeable decrease battery uptime.
 ;
 ; Thanks to Suzanne Schiller for the idea.
-#define ver 210
+#ver 210
 
 ;@notification_backlight_timeout_ms val
 ; This option controls backlight timeout for notifications.

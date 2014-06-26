@@ -5,7 +5,7 @@
 ; main watchface.
 ; This patch increases that timeout
 ; from 3 minutes to given timeout, 10 minutes by default.
-#define ver 200
+#ver 200
 
 ; this is an option description to be used in site interface.
 ; math syntax after space controls bounds and conversion:

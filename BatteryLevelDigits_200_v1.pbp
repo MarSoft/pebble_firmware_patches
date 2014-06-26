@@ -2,7 +2,7 @@
 ;
 ; Note that this patch might slightly increase battery consumption
 ; (though not much more than regular watchface/app showing battery state).
-#define ver 200
+#ver 200
 
 00 BF ?4 ?4 @
 1F B5 ?4  8D F8 00 00  C0 F3 07 23 C0 F3 07 40
