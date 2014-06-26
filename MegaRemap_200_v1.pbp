@@ -1,5 +1,6 @@
 ; This patch allows you to remap many buttons and/or events
 ; to perform user-defined actions instead of default ones.
+#define ver 000
 
 ;;;;;;;;;;;;
 ;;; Actions:

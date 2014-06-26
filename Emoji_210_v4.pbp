@@ -7,6 +7,7 @@
 ; Simple table will be used if patcher is called with -D simple
 ; and is intended to have fewer mappings,
 ; for lightweight font.
+#define ver 210
 
 ; Parameters (-D):
 ; noremap — don't use remap table at all

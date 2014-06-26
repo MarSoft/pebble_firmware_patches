@@ -3,6 +3,7 @@
 ; It remaps Emoji range (0x1F6xx) to Letter-like symbols (0x21xx).
 ;
 ; This version is buggy and doesn't work.
+#define ver 200
 
 ; inject call to our code into
 ; text_resources_try_load_glyph_metadata proc

@@ -1,5 +1,6 @@
 ; This file defines (some) graphics functions
 ; for 2.1 firmware
+#define ver 210
 
 #ifndef _graphics_h
 #define _graphics_h

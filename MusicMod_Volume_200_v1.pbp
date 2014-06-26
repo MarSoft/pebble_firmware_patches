@@ -1,6 +1,7 @@
 ; This patch changes behaviour of stock Music app.
 ; Short press on up/down buttons will change volume,
 ; and long press will switch tracks.
+#define ver 200
 
 #default longpress_delay_ms 200
 

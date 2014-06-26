@@ -1,4 +1,5 @@
 ; This file defines functions to work with services
+#define ver 200
 
 ; Some service IDs:
 ; 01. Accelerometer data

@@ -1,4 +1,5 @@
 ; This is a patch to fix iOS CallerID bug
+#define ver 194
 
 2D E9 F3 47 1E 46 47 4B {
 	proc setTimer

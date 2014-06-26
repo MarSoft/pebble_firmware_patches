@@ -11,6 +11,7 @@
 ; but not "Increase volume by X percent".
 ; So we start with 50% volume and then change it.
 ; We cannot know current phone's volume on iOS.
+#define ver 200
 
 #default longpress_delay_ms 250
 ; iOS volume changes from 0 to 127.

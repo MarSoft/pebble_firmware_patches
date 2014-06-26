@@ -2,6 +2,7 @@
 ; It is intended for being #included
 ; from other patches, to provide ready signature
 ; for them to use.
+#define ver 200
 
 ; this is classic c-style approach for unique-including
 #ifndef _applog_h

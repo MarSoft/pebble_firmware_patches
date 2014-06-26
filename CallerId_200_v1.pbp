@@ -1,4 +1,5 @@
 ; This is a patch to fix iOS CallerID bug
+#define ver 200
 
 2D E9 FF 4F 85 B0 83 46 15 00 99 46 7E D0 {
 	proc HFRE_send

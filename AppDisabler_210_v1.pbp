@@ -1,6 +1,7 @@
 ; This patch allows to selectively disable
 ; certain built-in apps.
 ; For firmware 2.1.0.
+#define ver 210
 
 ; The stock order is:
 ; 1. Sliding Text Watch

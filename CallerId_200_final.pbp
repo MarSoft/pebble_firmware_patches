@@ -2,6 +2,7 @@
 ; It works by fixing HandsFreeProtocol initialization procedure
 ; asking iPhone to send us data in UTF-8 charset
 ; instead of default 7bit.
+#define ver 200
 
 ; This patch should work with most firmware versions,
 ; because it only changes Bluetopia library code

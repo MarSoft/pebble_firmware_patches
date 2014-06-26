@@ -1,4 +1,5 @@
 ; This library defines window_*_click_subscribe functions
+#define ver 210
 
 #ifndef _click_config_h
 #define _click_config_h

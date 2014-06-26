@@ -8,6 +8,7 @@
 ; until user manually closes it.
 ;
 ; Thanks to Svein Andre Nilsen for the idea.
+#define ver 200
 
 ; notifications_schedule_hiding function:
 10 b5 0a 4c 94 f8 a8 31  7b b1

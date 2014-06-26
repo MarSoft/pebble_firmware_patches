@@ -11,6 +11,7 @@
 ; but not "Increase volume by X percent".
 ; So we start with 50% volume and then change it.
 ; We cannot know current phone's volume on iOS.
+#define ver 210
 
 ; Possible options:
 ;@music_mimic_musicboss
