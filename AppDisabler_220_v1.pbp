@@ -2,6 +2,7 @@
 ; certain built-in apps.
 ; For firmware 2.2.0.
 #ver 220
+;!internal
 
 ; The stock order is:
 ; 1. Sliding Text Watch
