@@ -8,6 +8,7 @@
 ; and is intended to have fewer mappings,
 ; for lightweight font.
 #ver 200
+;!internal
 
 ; Parameters (-D):
 ; noremap — don't use remap table at all
