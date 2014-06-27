@@ -13,7 +13,7 @@
 ; This is greatly simplified since 2.0 app with Locker.
 ;
 ; This version works with 2.0.0, any HW version.
-#ver 200
+#ver 200 209
 
 ; just a simple mask to find named proc
 08 4b 10 b5 04 46 18 68 08 e0 {

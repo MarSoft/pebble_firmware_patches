@@ -4,7 +4,7 @@
 ;
 ; Note that this patch might slightly increase battery consumption
 ; (though not much more than regular watchface/app showing battery state).
-#ver 210
+#ver 210 220
 
 ; Options:
 ;@statusbar_battery_no_stock_icon

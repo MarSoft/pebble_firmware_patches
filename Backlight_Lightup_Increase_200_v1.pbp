@@ -2,7 +2,7 @@
 ; from 3 to 5 seconds (by default).
 ; PLEASE NOTE that backlight is very battery-hungry!
 ; So this patch might noticeable decrease battery uptime.
-#ver 200
+#ver 200 209
 
 ; default value: 5 seconds
 #default timeout_ms 5000

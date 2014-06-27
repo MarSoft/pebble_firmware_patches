@@ -8,7 +8,7 @@
 ; So this patch might noticeable decrease battery uptime.
 ;
 ; Thanks to Suzanne Schiller for the idea.
-#ver 200
+#ver 200 209
 
 ; default value: 6 seconds
 #default timeout_ms 6000
