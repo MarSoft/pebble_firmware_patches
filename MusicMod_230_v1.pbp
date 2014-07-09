@@ -27,8 +27,8 @@
 10 b5 04 46 ?4 4f f4 7a 71 00 22 {
 	proc music_app_volume_buttons_handler
 }
-38 b5 91 f8 f4 31 05 46 0c 46 1b b1 {
-	proc music_app_updown_click
+10 b5 04 46 ?4 00 22 4f f4 7a 71 ?4 {
+	proc music_app_track_buttons_handler
 }
 
 #include includes/click_config_230.pbi
@@ -70,22 +70,15 @@
 
 	MOV R0, 1 ; button_id_up
 	MOV R1, ${global_longpress_delay_ms}
-	LDR R2, pUpDownClick ; down_handler(press)
+	LDR R2, pTrackClick ; down_handler(press)
 	MOV R3, 0 ; up_handler(release)
 	BL window_long_click_subscribe
 
 	MOV R0, 3 ; button_id_down
 	MOV R1, ${global_longpress_delay_ms}
-	LDR R2, pUpDownClick ; down_handler(press)
+	LDR R2, pTrackClick ; down_handler(press)
 	MOV R3, 0 ; up_handler(release)
 	BL window_long_click_subscribe
-
-	POP {PC}
-
-	ALIGN 4
-	pSelClick:		DCD music_app_select_click+1
-	pVolClick:		DCD music_app_volume_buttons_handler+1
-	pUpDownClick:	DCD music_app_updown_click+1
 
 #ifdef music_return_to_glance
 	MOV R0, 0 ; button_id_back
@@ -93,10 +86,22 @@
 	BL window_single_click_subscribe
 #endif
 
+	POP {PC}
+
+	ALIGN 4
+	pSelClick:		DCD music_app_select_click+1
+	pVolClick:		DCD music_app_volume_buttons_handler+1
+	pTrackClick:	DCD music_app_track_buttons_handler+1
+;	pTrackHandler:	DCD my_track_handler+1
+
 #ifdef music_return_to_glance
 	pBackPressed: DCD back_pressed+1
 #endif
 }
+
+;{
+;	proc my_track_handler
+;}
 
 #ifdef music_return_to_glance
 ; for 2.0.x: 30 b5 85 b0 05 46 00 21  68 46 10 22 {
