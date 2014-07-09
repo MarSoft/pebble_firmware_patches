@@ -115,7 +115,8 @@
 	proc my_track_handler
 
 	PUSH {R0-R3,LR}
-	ADR R0, shortvibe
+	ADR R0, shortvibe_arr
+	MOV R1, 1
 	BL vibes_enqueue_custom_pattern
 	POP {R0-R3,LR}
 	B.W music_app_track_buttons_handler
