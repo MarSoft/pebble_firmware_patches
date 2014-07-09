@@ -9,4 +9,8 @@
 	proc vibes_short_pulse
 }
 
+37 b5 02 ab 03 e9 03 00  00 9d 65 b9 0a 48 25 21 {
+	proc vibes_enqueue_custom_pattern
+}
+
 #endif

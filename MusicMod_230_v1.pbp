@@ -5,7 +5,7 @@
 
 ; Possible options:
 ;WIP @music_mimic_musicboss (FIXME: doesn't work yet with 2.3 fw)
-; this will cause stock Music app
+; This will cause stock Music app
 ; to mimic MusicBoss UUID.
 ; This allows switching to Music app
 ; from Glance app (just tell it to switch to MusicBoss).
@@ -13,9 +13,13 @@
 ; Or else your watch will reboot or behave badly.
 ; So only use it if you don't use MusicBoss at all.
 ;WIP @music_return_to_glance
-; this will cause stock Music app
+; This will cause stock Music app
 ; to (try to) launch Glance app on exit,
 ; just like MusicBoss with appropriate option enabled.
+;@music_vibe_length_ms
+; This option controls length of vibe pulse
+; on button longpress (track change).
+#default music_vibe_length 100
 ;and also these:
 ;@global_longpress_delay_ms val
 ; This option controls longpress delay. 250 ms means 1/4 seconds, 1000 ms means 1 second, etc.
@@ -111,9 +115,17 @@
 	proc my_track_handler
 
 	PUSH {R0-R3,LR}
-	BL vibes_short_pulse
+	ADR R0, shortvibe
+	BL vibes_enqueue_custom_pattern
 	POP {R0-R3,LR}
 	B.W music_app_track_buttons_handler
+
+	ALIGN 4
+	shortvibe:
+	DCD shortvibe_arr
+	DCD 1
+	shortvibe_arr:
+	DCD ${music_vibe_length}
 }
 {
 	proc my_release_handler
