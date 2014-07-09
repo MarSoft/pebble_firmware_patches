@@ -32,6 +32,7 @@
 }
 
 #include includes/click_config_230.pbi
+#include includes/vibes_230.pbi
 
 #ifdef music_mimic_musicboss
 ; if mimicking MusicBoss, replace Music app's empty UUID
@@ -68,16 +69,25 @@
 	LDR R1, pVolClick
 	BL window_single_click_subscribe
 
+	B.W my_clickconfig
+
+	ALIGN 4
+	pSelClick:		DCD music_app_select_click+1
+	pVolClick:		DCD music_app_volume_buttons_handler+1
+}
+{
+	proc my_clickconfig
+
 	MOV R0, 1 ; button_id_up
 	MOV R1, ${global_longpress_delay_ms}
 	LDR R2, pTrackClick ; down_handler(press)
-	MOV R3, 0 ; up_handler(release)
+	LDR R3, pRelease ; up_handler(release)
 	BL window_long_click_subscribe
 
 	MOV R0, 3 ; button_id_down
 	MOV R1, ${global_longpress_delay_ms}
 	LDR R2, pTrackClick ; down_handler(press)
-	MOV R3, 0 ; up_handler(release)
+	LDR R3, pRelease ; up_handler(release)
 	BL window_long_click_subscribe
 
 #ifdef music_return_to_glance
@@ -89,19 +99,27 @@
 	POP {PC}
 
 	ALIGN 4
-	pSelClick:		DCD music_app_select_click+1
-	pVolClick:		DCD music_app_volume_buttons_handler+1
-	pTrackClick:	DCD music_app_track_buttons_handler+1
-;	pTrackHandler:	DCD my_track_handler+1
+	pTrackClick:	DCD my_track_handler+1
+	pRelease:		DCD my_release_handler+1
 
 #ifdef music_return_to_glance
 	pBackPressed: DCD back_pressed+1
 #endif
 }
 
-;{
-;	proc my_track_handler
-;}
+{
+	proc my_track_handler
+
+	PUSH {R0-R3,LR}
+	BL vibes_short_pulse
+	POP {R0-R3,LR}
+	B.W music_app_track_buttons_handler
+}
+{
+	proc my_release_handler
+
+	BX LR
+}
 
 #ifdef music_return_to_glance
 ; for 2.0.x: 30 b5 85 b0 05 46 00 21  68 46 10 22 {
