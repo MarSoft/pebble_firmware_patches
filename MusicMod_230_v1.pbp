@@ -19,7 +19,7 @@
 ;@music_vibe_length_ms
 ; This option controls length of vibe pulse
 ; on button longpress (track change).
-#default music_vibe_length 100
+#default music_vibe_length 75
 ;and also these:
 ;@global_longpress_delay_ms val
 ; This option controls longpress delay. 250 ms means 1/4 seconds, 1000 ms means 1 second, etc.
@@ -115,16 +115,13 @@
 	proc my_track_handler
 
 	PUSH {R0-R3,LR}
-	ADR R0, shortvibe_arr
-	MOV R1, 1
+	ADR R0, shortvibe_arr ; ptr to segments array
+	MOV R1, 1 ; segments count
 	BL vibes_enqueue_custom_pattern
 	POP {R0-R3,LR}
 	B.W music_app_track_buttons_handler
 
 	ALIGN 4
-	shortvibe:
-	DCD shortvibe_arr
-	DCD 1
 	shortvibe_arr:
 	DCD ${music_vibe_length}
 }
