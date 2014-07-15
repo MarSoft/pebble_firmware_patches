@@ -112,7 +112,7 @@
 
 	ALIGN 4
 #ifdef music_volume_on_longpress
-	pLongClick:	DCD music_app_select_click+1
+	pLongClick:	DCD music_app_volume_buttons_handler+1
 #else
 	pLongClick:	DCD my_track_handler+1
 #endif
