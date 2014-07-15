@@ -16,7 +16,11 @@
 ; This will cause stock Music app
 ; to (try to) launch Glance app on exit,
 ; just like MusicBoss with appropriate option enabled.
-;@music_vibe_length_ms
+;@music_volume_on_longpress
+; Default behaviour is to change volume on short press
+; and skip tracks on long press;
+; this option will reverse this.
+;@music_vibe_length_ms val
 ; This option controls length of vibe pulse
 ; on button longpress (track change).
 #default music_vibe_length 75
@@ -66,31 +70,35 @@
 	BL window_single_click_subscribe
 
 	MOV R0, 1 ; button_id_up
-	LDR R1, pVolClick
+	LDR R1, pShortClick
 	BL window_single_click_subscribe
 
 	MOV R0, 3 ; button_id_down
-	LDR R1, pVolClick
+	LDR R1, pShortClick
 	BL window_single_click_subscribe
 
 	B.W my_clickconfig
 
 	ALIGN 4
 	pSelClick:		DCD music_app_select_click+1
-	pVolClick:		DCD music_app_volume_buttons_handler+1
+#ifdef music_volume_on_longpress
+	pShortClick:	DCD my_track_handler+1
+#else
+	pShortClick:	DCD music_app_volume_buttons_handler+1
+#endif
 }
 {
 	proc my_clickconfig
 
 	MOV R0, 1 ; button_id_up
 	MOV R1, ${global_longpress_delay_ms}
-	LDR R2, pTrackClick ; down_handler(press)
+	LDR R2, pLongClick ; down_handler(press)
 	LDR R3, pRelease ; up_handler(release)
 	BL window_long_click_subscribe
 
 	MOV R0, 3 ; button_id_down
 	MOV R1, ${global_longpress_delay_ms}
-	LDR R2, pTrackClick ; down_handler(press)
+	LDR R2, pLongClick ; down_handler(press)
 	LDR R3, pRelease ; up_handler(release)
 	BL window_long_click_subscribe
 
@@ -103,8 +111,12 @@
 	POP {PC}
 
 	ALIGN 4
-	pTrackClick:	DCD my_track_handler+1
-	pRelease:		DCD my_release_handler+1
+#ifdef music_volume_on_longpress
+	pLongClick:	DCD music_app_select_click+1
+#else
+	pLongClick:	DCD my_track_handler+1
+#endif
+	pRelease:	DCD my_release_handler+1
 
 #ifdef music_return_to_glance
 	pBackPressed: DCD back_pressed+1
