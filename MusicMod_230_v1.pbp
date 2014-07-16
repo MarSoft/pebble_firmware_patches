@@ -81,11 +81,7 @@
 
 	ALIGN 4
 	pSelClick:		DCD music_app_select_click+1
-#ifdef music_volume_on_longpress
-	pShortClick:	DCD my_track_handler+1
-#else
-	pShortClick:	DCD music_app_volume_buttons_handler+1
-#endif
+	pShortClick:	DCD my_click_handler+1
 }
 {
 	proc my_clickconfig
@@ -111,11 +107,7 @@
 	POP {PC}
 
 	ALIGN 4
-#ifdef music_volume_on_longpress
-	pLongClick:	DCD music_app_volume_buttons_handler+1
-#else
-	pLongClick:	DCD my_track_handler+1
-#endif
+	pLongClick:	DCD my_longclick_handler+1
 	pRelease:	DCD my_release_handler+1
 
 #ifdef music_return_to_glance
@@ -124,14 +116,27 @@
 }
 
 {
-	proc my_track_handler
+	proc my_click_handler
+#ifdef music_volume_on_longpress
+	B.W music_app_track_buttons_handler
+#else
+	B.W music_app_volume_buttons_handler
+#endif
+}
+
+{
+	proc my_longclick_handler
 
 	PUSH {R0-R3,LR}
 	ADR R0, shortvibe_arr ; ptr to segments array
 	MOV R1, 1 ; segments count
 	BL vibes_enqueue_custom_pattern
 	POP {R0-R3,LR}
+#ifdef music_volume_on_longpress
+	B.W music_app_volume_buttons_handler
+#else
 	B.W music_app_track_buttons_handler
+#endif
 
 	ALIGN 4
 	shortvibe_arr:
