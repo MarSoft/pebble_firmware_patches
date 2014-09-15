@@ -1,0 +1,71 @@
+; This patch will bounce airplane mode
+; when Back-Back is pressed on any watchface.
+;
+; Not compatible with LaunchBank*
+
+01 4b 18 78 70 47 00 bf ?4
+2d e9 f0 41 11 4c 06 46 0f 46 {
+	proc is_airplane_mode
+}
+2d e9 f0 41 11 4c 06 46 0f 46 {
+	proc airplane_mode_change
+}
+
+#include includes/vibes_230.pbi
+
+;code from LaunchBank14:
+37 B5 0D 46 04 46 0D F1 02 01 01 A8 {
+	proc time_ms
+}
+; This matches some SerialConsole-related proc
+; which references memory address used for serial console read buffer.
+; We will use this address to store timer value.
+08 B5 05 4B 1B 78 13 B9  3E 20 ?4 03 4B
+00 22 C3 F8 84 20 08 BD  ?4 @ {
+	val counter_ptr
+}
+; This matches beginning of watchface_button_handler proc.
+; We replace "CMP R3, 5 // BEQ ret" with our code:
+38 B5 03 78 @ 05 2b 29 d0  00 79 02 28 04 d0 03 28 {
+    B.W my_code
+    global continue ; and will return here if we wouldn't like to consume button :)
+}
+
+{
+	proc my_code
+	CMP R3, 5
+	BEQ ret
+
+	LDRB R0, [R5,4]
+	CBNZ R0, cont ; not Back
+
+	; and now our actions (on Back button)
+	BL is_airplane_mode
+	EOR R0,R0,1 ; i.e. xor r0,1
+	MOV R1, 0
+	MOV R2, 0
+	BL airplane_mode_change
+	CBZ R0, err
+
+	;ok:
+	BL vibes_short_pulse
+	B ret
+
+	err:
+	ADR R0,seg
+	MOV R1,3
+	BL vibes_enqueue_custom_pattern
+
+	ret:
+	POP {R3-R5,PC}
+
+	cont:
+	MOV R0, R5
+	B.W continue
+
+	ALIGN 4
+	seg:
+	DCD 100
+	DCD 100
+	DCD 100
+}
