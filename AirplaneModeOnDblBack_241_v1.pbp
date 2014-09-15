@@ -36,7 +36,7 @@
 	CMP R3, 5
 	BEQ ret
 
-	LDRB R0, [R5,4]
+	LDRB R0, [R4,4]
 	CBNZ R0, cont ; not Back
 
 	; and now our actions (on Back button)
@@ -60,7 +60,7 @@
 	POP {R3-R5,PC}
 
 	cont:
-	MOV R0, R5
+	MOV R0, R4
 	B.W continue
 
 	ALIGN 4
