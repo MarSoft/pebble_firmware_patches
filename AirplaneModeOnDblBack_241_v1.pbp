@@ -3,6 +3,8 @@
 ;
 ; Not compatible with LaunchBank*
 
+#default back_dblclick_delay_ms 500
+
 01 4b 18 78 70 47 00 bf ?4
 2d e9 f0 41 11 4c 06 46 0f 46 {
 	proc is_airplane_mode
@@ -39,6 +41,23 @@
 	LDRB R0, [R4,4]
 	CBNZ R0, cont ; not Back
 
+	LDR R2, counter
+	LDR R5, [R2] ; old counter val
+	MOV R1, 0
+	BL time_ms
+	LDR R2, counter
+	LDR R1, [R2]
+	MOV R3, 1000
+	MUL R1, R3 ; convert seconds to millis
+	ADD R1, R0
+	STR R1, [R2] ; update counter
+
+	; now check diff
+	SUB R1, R1, R5
+	MOV.W R3, ${back_dblclick_delay_ms} ; delay in millis
+	CMP R1, R3
+	BHI ret ; if diff is too large, do nothing
+
 	; and now our actions (on Back button)
 	BL is_airplane_mode
 	EOR R0,R0,1 ; i.e. xor r0,1
@@ -68,4 +87,8 @@
 	DCD 100
 	DCD 100
 	DCD 100
+
+	ALIGN 4
+	counter:
+	DCD counter_ptr
 }
