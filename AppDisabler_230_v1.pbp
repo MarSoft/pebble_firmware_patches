@@ -36,7 +36,7 @@
 
 ; This is app list
 "Upgraded" 00 "Removed" 00
-00
+00 00
 @ ?46 01 08
 {
 	global lstBuiltinApps
