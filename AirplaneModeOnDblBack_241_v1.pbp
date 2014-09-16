@@ -41,9 +41,10 @@
 	LDRB R0, [R4,4]
 	CBNZ R0, cont ; not Back
 
-	LDR R2, counter
-	LDR R5, [R2] ; old counter val
-	MOV R1, 0
+	LDR R0, counter
+	LDR R5, [R0] ; old counter val
+	; R0:tloc (store seconds in counter variable
+	MOV R1, 0 ; out_ms
 	BL time_ms
 	LDR R2, counter
 	LDR R1, [R2]
