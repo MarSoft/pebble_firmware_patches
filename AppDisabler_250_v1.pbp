@@ -1,0 +1,68 @@
+; This patch allows to selectively disable
+; certain built-in apps.
+; For firmware 2.5.0.
+#ver 250
+;!internal
+
+; The stock order is:
+; 1. Sliding Text Watch
+; 2. Classic Analog
+; 3. Simplicity
+; 4. Music
+; 5. Notifications
+; 6. Sports				-unremovable
+; 7. Golf				-unremovable
+; 8. Alarms
+; 9. Watchfaces
+; 10.Settings			-unremovable
+; 11.Getting Started	-unremovable
+; 12.Date & Time		-unremovable
+; Total: 7 changeable apps
+
+; Usage:
+; Supply appcount variable (7..0)
+; and corresponding number of appN variables
+; containing app names in desired order.
+; Note that they will be arranged in reverse order!
+; If appcount == e.g. 6, then app7 will not be used. Etc.
+#default appcount 7
+#default app7 slidingtext
+#default app6 classicanalog
+#default app5 simplicity
+#default app4 music
+#default app3 notifications
+#default app2 alarms
+#default app1 watchfaces
+
+; This is app list
+"Upgraded" 00 "Removed" 00
+@ ?48 "app_manager.c"
+{
+	global lstBuiltinApps
+	
+	val app_slidingtext
+	DCD app_${app7}
+	val app_classicanalog
+	DCD app_${app6}
+	val app_simplicity
+	DCD app_${app5}
+	val app_music
+	DCD app_${app4}
+	val app_notifications
+	DCD app_${app3}
+	val app_sports
+	DCD app_${app2}
+	val app_golf
+	DCD app_${app1}
+	val app_alarms
+	DCD app_sports ; move it here
+	val app_watchfaces
+	DCD app_golf ; move it here
+}
+
+; Now update the "skip byte", which is actually MOV operator
+; it is in app_install_manager_init proc
+f7 b5 @ 00 25 24 4b eb 58 98 47 {
+	; was: MOV R5, 0
+	MOV R5, 7-${appcount}*4 ; will be calculated in order specified, i.e. (7-appcount)*4
+}
