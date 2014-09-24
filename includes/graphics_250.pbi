@@ -1,0 +1,28 @@
+; This file defines (some) graphics functions
+; for 2.1 firmware
+#define ver 210
+
+#ifndef _graphics_h
+#define _graphics_h
+
+90 f8 26 30 61 f3 83 03  80 f8 26 30 70 47 {
+	proc graphics_context_set_fill_color
+}
+
+90 f8 26 30 61 f3 05 13  80 f8 26 30 70 47 {
+	proc graphics_context_set_text_color
+}
+
+90 f8 27 30 61 f3 02 03  80 f8 27 30 70 47 {
+	proc graphics_context_set_compositing_mode
+}
+
+30 b5 85 b0 9d f8 20 50  02 ac 00 95 90 f8 26 50 {
+	proc graphics_fill_rect
+}
+
+82 B0 F0 B5 0E 46 93 B0 {
+	proc graphics_draw_text
+}
+
+#endif

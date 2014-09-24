@@ -1,0 +1,266 @@
+; Always display current battery level in statusbar.
+; Also displays bluetooth connection status icon.
+; It is not currently updated automatically on bt connection gain/lose.
+;
+; Note that this patch might slightly increase battery consumption
+; (though not much more than regular watchface/app showing battery state).
+#ver 250
+
+; Options:
+;@statusbar_battery_no_stock_icon
+; Never show stock battery icon
+;@+statusbar_battery_level_icon
+; Show battery percentage with icon
+; (You may want to disable stock battery icon to avoid icon duplication)
+;@+statusbar_battery_level_icon_hide_if_stock_shown
+;  Only show battery percentage icon if no stock battery icon shown
+;@statusbar_battery_level_digits
+; Show digital battery percentage
+;@+statusbar_bluetooth_show_icon
+; Show bluetooth status icon
+; Normal if connected, inverted if disconnected
+;@statusbar_bluetooth_hide_when_disconnected
+;  Only show bluetooth icon when there is bluetooth connection
+
+bd e8 10 40 ?4 @
+07 B5 ?4  00 23 c2 b2 62 f3 07 03 c0 f3 07 22 {
+	proc battery_state_service_peek
+}
+0C B4 7F B5 08 9A 05 46 {
+	proc snprintf
+}
+F8 B5 00 AF 04 46 {
+	proc fonts_get_system_font
+}
+"RESOURCE_ID_GOTHIC_14" 00 {
+	global res_id_gothic_14
+}
+01 4b 18 78 70 47 00 bf ?4
+; and for disambiguation:
+2d e9 f8 43 11 4d 07 46
+{
+	proc is_airplane_mode
+}
+08 b5 ?4 00 30 18 bf 01 20 08 bd
+; and for disambiguation:
+38 b5 0c 46 15 46 10 b1
+{
+	proc is_bluetooth_connected
+}
+73 b5 b1 f9 0c 60 04 2a {
+	proc status_bar_draw_icon
+}
+#include includes/graphics_250.pbi
+; for disambiguation (as there seems to be more than one such icon):
+"Legal" 00 00 00 00
+?32
+@
+?4 04 00 00 10 00 00 00 00 07 00 0b 00
+77 00 00 00 67 00 00 00  57 00 00 00 36 00 00 00
+55 00 00 00 63 00 00 00  55 00 00 00 36 00 00 00
+57 00 00 00 67 00 00 00  77 00 00 00
+{
+	global icon_bluetooth
+}
+@ ?4 04 00 00 10 00 00 00 00 10 00 10 00
+"status_bar.c" 00
+{
+	global icon_battery_full
+}
+
+#ifdef statusbar_battery_icon_no_stock
+; This matches middle of status_bar_draw procedure,
+; the part responsible for determining desired
+; battery level icon and drawing it if needed.
+;
+; prev: launch custom drawing proc if needed
+2B 68 73 B1 20 46 00 21  ?4 22 4B 20 46
+19 68 06 22 8D 23 ?4        C0 F1 88 00
+85 b2 00 E0 8D 25
+; next: BL is_airplane_mode
+{
+	B.W my_code
+	; Skip unneeded now code to position label correctly
+	DCB "SkipSkipSkipSkipSkipSkipSkipSkip"
+	global continue
+}
+#else
+; Use the same mask, but place call after its end
+; prev: launch custom drawing proc if needed
+; here: draw battery icon if any, and place offset to R5
+2B 68 73 B1 20 46 00 21  ?4 22 4B 20 46
+19 68 06 22 8D 23 ?4        C0 F1 88 00
+85 b2 00 E0 8D 25
+@ ?4
+{
+	; was: BL is_airplane_mode
+	B.W my_code
+	global continue
+}
+#endif
+
+; Place our code to floating block
+{
+	proc my_code
+
+#ifdef statusbar_battery_icon_no_stock
+	MOV R5, 141 ; initialize offset: there was no battery icon, so just retain few pixel field
+#endif
+	; else - it was initialized when stock icon was (or wasn't) drawn
+
+#ifdef statusbar_battery_level_icon
+	CMP R5, 141 ; check offset
+#ifdef statusbar_battery_level_icon_hide_if_stock_shown
+	BNE battery_icon_end
+#else
+	BEQ battery_icon_nostock
+	ADD R5, R5, 2 ; decrease stock icon's margin
+	battery_icon_nostock:
+#endif
+
+	; set compositing mode (white on black)
+	MOV R0, R4
+	MOV R1, 0
+	BL graphics_context_set_compositing_mode
+
+	; draw "battery full" icon
+	MOV R0, R4
+	LDR R1, pBatteryFullIcon
+	MOV R2, 6 ; shifted to right edge
+	MOV R3, R5 ; shift value
+	BL status_bar_draw_icon
+	PUSH {R5} ; store right edge value..
+	; and update shift value
+	SUB R5, R0
+	SUB R5, 3 ; and leave 3px margin
+
+	MOV R0, R4
+	MOV R1, 0 ; black
+	BL graphics_context_set_fill_color
+
+	; get battery level
+	BL battery_state_service_peek
+	UXTB R1, R0 ; just throw away charging info [for now]
+	; divide by 10 (this method is slow but simple to code)
+	MOV R0, 0
+	divide_loop:
+	CBZ R1, divide_end
+	SUBS R1, 10 ; FIXME: what if R1 will not be divisible by 10?
+	ADD R0, 1
+	B divide_loop
+	divide_end:
+	; now R0 is batt_level/10
+	MOV R1, 10
+	SUB R0, R1, R0 ; now R0 has (10-R0), i.e. desired black rectangle width
+
+	; draw black rectangle over right part of the icon
+	POP {R1} ; x: restore icon's right edge value
+	SUB R1, 3 ; ...minus right frame
+	SUB R1, R0 ; ...minus rect width
+	ADD R1, R1,0x60000 ; y: 6
+	MOV R2, R0 ; width
+	ADD R2, R2,0x40000 ; height: 4
+	MOV R3, 0 ; corner_radius
+	STR R3, [SP] ; corner_mask
+	MOV R0, R4 ; ctx
+	BL graphics_fill_rect
+
+	battery_icon_end:
+#endif
+
+#ifdef statusbar_battery_level_digits
+	BL battery_state_service_peek ; FIXME: doing this at every redraw might be power-consuming?
+	; now R0 contains a BatteryChargeState structure:
+	; 00 . is_plugged . is_charging . percent
+	UXTB R0, R0 ; just throw away charging info for now
+	PUSH {R0} ; store it for later use
+	MOV R3, R0
+	ADD R0, SP,16+4 ; use free space in stack (max is 0x24=36; for this string maximum is 20 chars)
+					; 16+4 because original 16 offset increased by 4 with our PUSH
+	MOV R1, 5 ; buffer size
+	ADR R2, format
+	BL snprintf
+	; now we have complete "nn%" string at [old_SP+16]
+	LDR R0, fontname
+	BL fonts_get_system_font
+	MOV R2, R0 ; font
+	POP {R1} ; restore percentage value into R1, and also restore old SP value
+	; now calculate text width
+	CMP R1, 100
+	BNE narrow
+	MOV R1, 18 ; text width
+	B width_ok
+	narrow:
+	MOV R1, 12 ; text width
+	width_ok:
+	MOV R0, 0
+	STR R0, [SP,4] ; overflow_mode
+	STR R0, [SP,8] ; alignment
+	STR R0, [SP,12] ; layout
+	MOV R0, R4 ; ctx
+	MOV R3, R1 ; text width
+	ADD R3, R3,0x000E0000 ; height: 0xE = 14 = statusbar height
+	STR R3, [SP] ; box_2
+	LDR R3, yminus ; y = -1
+	ADD R3, R5 ; x: offset from the right...
+	SUB R3, R1 ; ...minus field width
+	; now while we hold text width, update R5
+	SUB R5, R1 ; hold that space from other icons
+	SUB R5, 2 ; and hold some more space (field)
+	; and continue calling preparation
+	ADD R1, SP,16 ; text
+	; now R3 is box_1
+	BL graphics_draw_text
+#endif
+
+#ifdef statusbar_bluetooth_show_icon
+#ifdef statusbar_bluetooth_hide_when_disconnected
+	BL is_bluetooth_connected
+	CBZ R0, bluetooth_end ; no connection -> no icon
+#endif
+
+#ifndef statusbar_bluetooth_hide_when_disconnected
+	BL is_bluetooth_connected
+	MOV R1, R0 ; mode (inversion) depends on connection status
+#else
+	MOV R1, 1 ; always white-on-black
+#endif
+	MOV R0, R4
+	BL graphics_context_set_compositing_mode
+
+	MOV R0, R4 ; context
+	LDR R1, bticon
+	MOV R2, 6 ; icon shifted to the right
+	MOV R3, R5 ; shift value
+	BL status_bar_draw_icon
+	SUB R5, R0 ; hold icon width space
+	SUB R5, 2 ; ... and 2-pixel field
+
+	bluetooth_end:
+#endif
+
+#ifndef statusbar_battery_no_stock_icon
+	BL is_airplane_mode ; restore overwritten code
+#endif
+	B.W continue
+
+	; data block
+	ALIGN 4
+#ifdef statusbar_battery_level_digits
+	fontname:
+	DCD res_id_gothic_14
+	format:
+	DCB "%d" 00
+	ALIGN 4
+	yminus:
+	DCD 0xFFFF0000
+#endif
+#ifdef statusbar_bluetooth_show_icon
+	bticon:
+	DCD icon_bluetooth
+#endif
+#ifdef statusbar_battery_level_icon
+	pBatteryFullIcon:
+	DCD icon_battery_full
+#endif
+}
