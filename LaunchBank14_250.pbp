@@ -50,11 +50,11 @@
 	CMP R3, 4 ; reexecute replaced code
 	BEQ ret; we don't need button_up events
 
-	MOV R5, R0 ; save R0 as we want to use it
+	; R0 already saved in R4. Was: MOV R5, R0 ; save R0 as we want to use it
 
 	; check if this is first or subsequent btn press
 	LDR R0, counter
-	LDR R4, [R0] ; get old counter value
+	LDR R5, [R0] ; get old counter value
 	MOV R1, 0
 	BL time_ms
 	LDR R2, counter
@@ -64,7 +64,7 @@
 	ADD R1, R0 ; now R1 contains full timestamp
 
 	; check current button
-	LDRB R0, [R5,4]
+	LDRB R0, [R4]
 	CBNZ R0, notupdate
 
 	; update counter only if this was Back btn
@@ -72,7 +72,7 @@
 
 	; check diff
 	notupdate:
-	SUB R1, R1, R4 ; calculate diff
+	SUB R1, R1, R5 ; calculate diff
 	MOV.W R3, 500 ; delay in millis
 	CMP R1, R3
 	BHI cont ; if diff is too large, pass this button to original proc
@@ -88,9 +88,8 @@
 	ret: ; terminate proc
 	db 38 BD ; POP {R3-R5,PC}
 
-	cont: ; return to original proc for it to handle this button
-	MOV R0, R5 ; restore R0
-        MOV R4, R0 ; restore R4
+	cont: ; return to original proc and let it handle this button
+	MOV R0, R4 ; restore R0
 	B.W continue
 
 	; ---------------------------
