@@ -82,7 +82,7 @@
 	; i.e. launch app from bank 0..3 depending on button
 	BL app_manager_get_bank_info
 	CBZ R0, ret ; if no such app, just return
-	LDR R0, [R0,0xC] ; get app id from bank info
+	LDR R0, [R0,0x10] ; get app id from bank info
 	BL app_manager_launch
 
 	ret: ; terminate proc
