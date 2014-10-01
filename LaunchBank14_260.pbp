@@ -11,9 +11,7 @@
 ; You may choose which app is installed in which bank
 ; by uninstalling and reinstalling apps in desired order.
 ; This is greatly simplified since 2.0 app with Locker.
-;
-; This version works with 2.2.0, any HW version.
-#ver 220
+#ver 260
 
 ; just a simple mask to find named proc
 07 4b 10 b5 04 46 58 68 48 b1 {
@@ -47,7 +45,7 @@ c0 d1 80 00 @
 {
 	proc my_code
 	CMP R3, 0 ; reexecute replaced code
-	BEQ ret
+	BNE ret
 	; We can use: R0,R1,R2,R3,R4
 	; R5 is button event struct
 
