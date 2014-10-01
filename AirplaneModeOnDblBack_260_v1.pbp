@@ -1,0 +1,98 @@
+; This patch will bounce airplane mode
+; when Back-Back is pressed on any watchface.
+;
+; Not compatible with LaunchBank*
+#ver 250
+
+#default back_dblclick_delay_ms 500
+
+01 4b 18 78 70 47 00 bf ?4
+2d e9 f0 41 10 4c 06 46 0f 46 {
+	proc is_airplane_mode
+}
+2d e9 f0 41 10 4c 06 46 0f 46 {
+	proc airplane_mode_change
+}
+
+#include includes/vibes_250.pbi
+
+;code from LaunchBank14:
+37 B5 0D 46 04 46 0D F1 02 01 01 A8 {
+	proc time_ms
+}
+; This matches some SerialConsole-related proc
+; which references memory address used for serial console read buffer.
+; We will use this address to store timer value.
+08 48 bd e8 70 40 ?4 07 48 ?4 bd e8 70 40 01 20 ?4 00 bf @ ?4 {
+	val counter_ptr
+}
+; This matches middle of watchface_button_handler proc.
+2c 78 02 2c 04 d0 03 2c 0e d0 @
+01 2c 41 d1 0b e0 {
+	; was:
+	; CMP R4, 1 ; Up btn
+	; BNE ret
+	; (ret: ADD SP,SP,0xC; POP {R4,R5,PC})
+    B.W my_code
+    global continue ; and will return here if we wouldn't like to consume button :)
+}
+
+{
+	proc my_code
+	CMP R4, 1
+	BEQ cont
+
+	; now it is definitely Back button
+
+	LDR R0, counter
+	LDR R5, [R0] ; old counter val
+	; R0:tloc (store seconds in counter variable
+	MOV R1, 0 ; out_ms
+	BL time_ms
+	LDR R2, counter
+	LDR R1, [R2]
+	MOV R3, 1000
+	MUL R1, R3 ; convert seconds to millis
+	ADD R1, R0
+	STR R1, [R2] ; update counter
+
+	; now check diff
+	SUB R1, R1, R5
+	MOV.W R3, ${back_dblclick_delay_ms} ; delay in millis
+	CMP R1, R3
+	BHI ret ; if diff is too large, do nothing
+
+	; and now our actions (on Back button)
+	BL is_airplane_mode
+	EOR R0,R0,1 ; i.e. xor r0,1
+	MOV R1, 0
+	MOV R2, 0
+	BL airplane_mode_change
+	CBZ R0, err
+
+	;ok:
+	BL vibes_short_pulse
+	B ret
+
+	err:
+	ADR R0,seg
+	MOV R1,3
+	BL vibes_enqueue_custom_pattern
+
+	ret:
+	ADD SP,SP,0xC
+	POP {R4,R5,PC}
+
+	cont:
+	B.W continue
+
+	ALIGN 4
+	seg:
+	DCD 100
+	DCD 100
+	DCD 100
+
+	ALIGN 4
+	counter:
+	DCD counter_ptr
+}
