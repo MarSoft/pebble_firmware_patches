@@ -87,8 +87,8 @@ c0 d1 80 00 @
 	BHI cont ; if diff is too large, pass this button to original proc
 
 	; now check again if it is release event
-	LDRB R0, [R5,9]
-	CMP R0, 4
+	LDRB R1, [R5,9]
+	CMP R1, 4
 	BEQ ret ; and ignore it
 
 	; now launch app: get its info -
