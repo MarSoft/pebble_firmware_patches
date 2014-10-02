@@ -24,6 +24,8 @@
 ; This option controls length of vibe pulse
 ; on button longpress (track change).
 #default music_vibe_length 75
+;@music_vibe_disable
+; Allows to disable vibe on longpress completely
 ;and also these:
 ;@global_longpress_delay_ms val
 ; This option controls longpress delay. 250 ms means 1/4 seconds, 1000 ms means 1 second, etc.
@@ -40,7 +42,10 @@
 }
 
 #include includes/click_config_250.pbi
+
+#ifndef music_vibe_disable
 #include includes/vibes_250.pbi
+#endif
 
 #ifdef music_mimic_musicboss
 ; if mimicking MusicBoss, replace Music app's empty UUID
@@ -127,20 +132,24 @@
 {
 	proc my_longclick_handler
 
+#ifndef music_vibe_disable
 	PUSH {R0-R3,LR}
 	ADR R0, shortvibe_arr ; ptr to segments array
 	MOV R1, 1 ; segments count
 	BL vibes_enqueue_custom_pattern
 	POP {R0-R3,LR}
+#endif
 #ifdef music_volume_on_longpress
 	B.W music_app_volume_buttons_handler
 #else
 	B.W music_app_track_buttons_handler
 #endif
 
+#ifndef music_vibe_disable
 	ALIGN 4
 	shortvibe_arr:
 	DCD ${music_vibe_length}
+#endif
 }
 {
 	proc my_release_handler
