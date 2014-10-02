@@ -49,9 +49,9 @@ c0 d1 80 00 @
 	; We can use: R0,R1,R2,R3,R4
 	; R5 is button event struct
 
-	LDRB R0, [R5,9] ; press or release?
-	CMP R0, 4 ; release
-	BEQ cont ; don't handle it
+	;LDRB R0, [R5,9] ; press or release?
+	;CMP R0, 4 ; release
+	;BEQ cont ; don't handle it
 
 	; check if this is first or subsequent btn press
 	LDR R0, counter
@@ -67,16 +67,29 @@ c0 d1 80 00 @
 	; check current button
 	LDRB R0, [R5]
 	CBNZ R0, notupdate
+	; and if it is release event
+	LDRB R0, [R5,9]
+	CMP R0, 4
+	BEQ notupdate
 
 	; update counter only if this was Back btn
 	STR R1, [R2] ; update counter value
+	B updated
 
-	; check diff
 	notupdate:
+	STR R4, [R2] ; restore old value
+	
+	updated:
+	; check diff
 	SUB R1, R1, R4 ; calculate diff
 	MOV.W R3, 500 ; delay in millis
 	CMP R1, R3
 	BHI cont ; if diff is too large, pass this button to original proc
+
+	; now check again if it is release event
+	LDRB R0, [R5,9]
+	CMP R0, 4
+	BEQ ret ; and ignore it
 
 	; now launch app: get its info -
 	; R0 holds button id, which we use as bank id,
