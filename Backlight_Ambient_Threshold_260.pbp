@@ -2,6 +2,8 @@
 ; This allows to change value
 ; after which ambient light is counted "bright enough" to disable backlight.
 
+#ver 200
+
 ;@backlight_ambient_threshold val
 ; The value to change.
 #default backlight_ambient_threshold 3180
