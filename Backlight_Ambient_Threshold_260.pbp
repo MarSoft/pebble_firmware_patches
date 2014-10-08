@@ -1,0 +1,13 @@
+; Change ambient threshold for backlight.
+; This allows to change value
+; after which ambient light is counted "bright enough" to disable backlight.
+
+;@backlight_ambient_threshold val
+; The value to change.
+#default backlight_ambient_threshold 3180
+
+; ambient_init proc:
+73 b5 1f 4b 1f 4c @ 40 f6 6c 42 {
+	; was: MOVW R2, 3180
+	MOVW R2, ${backlight_ambient_threshold}
+}
