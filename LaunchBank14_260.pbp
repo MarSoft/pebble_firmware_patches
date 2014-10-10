@@ -50,7 +50,7 @@ c0 d1 80 00 @
 	; R5 is button event struct
 
 	;LDRB R0, [R5,9] ; press or release?
-	;CMP R0, 4 ; release
+	;CMP R0, 5 ; release
 	;BEQ cont ; don't handle it
 
 	; check if this is first or subsequent btn press
@@ -69,7 +69,7 @@ c0 d1 80 00 @
 	CBNZ R0, notupdate
 	; and if it is release event
 	LDRB R0, [R5,9]
-	CMP R0, 4
+	CMP R0, 5
 	BEQ notupdate
 
 	; update counter only if this was Back btn
@@ -88,7 +88,7 @@ c0 d1 80 00 @
 
 	; now check again if it is release event
 	LDRB R1, [R5,9]
-	CMP R1, 4
+	CMP R1, 5
 	BEQ ret ; and ignore it
 
 	; now launch app: get its info -
