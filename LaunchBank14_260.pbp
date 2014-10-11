@@ -49,10 +49,6 @@ c0 d1 80 00 @
 	; We can use: R0,R1,R2,R3,R4
 	; R5 is button event struct
 
-	;LDRB R0, [R5,9] ; press or release?
-	;CMP R0, 5 ; release
-	;BEQ cont ; don't handle it
-
 	; check if this is first or subsequent btn press
 	LDR R0, counter
 	LDR R4, [R0] ; get old counter value
@@ -66,14 +62,16 @@ c0 d1 80 00 @
 
 	; check current button
 	LDRB R0, [R5]
+#include includes/app_log_260.pbi
+BL log_r0
 	CBNZ R0, notupdate
-	; and if it is release event
-	LDRB R0, [R5,9]
-	CMP R0, 5
-	BEQ notupdate
+	; let's handle both press and release events for timer update.
+	; I.e. update counter even on Release events.
+	; This may help users.
 
 	; update counter only if this was Back btn
 	STR R1, [R2] ; update counter value
+BL log_r1
 	B updated
 
 	notupdate:
@@ -83,13 +81,15 @@ c0 d1 80 00 @
 	; check diff
 	SUB R1, R1, R4 ; calculate diff
 	MOV.W R3, 500 ; delay in millis
+BL log_r1 ; log the diff
 	CMP R1, R3
 	BHI cont ; if diff is too large, pass this button to original proc
 
-	; now check again if it is release event
+	; now check if it is release event
 	LDRB R1, [R5,9]
+BL log_r1
 	CMP R1, 5
-	BEQ ret ; and ignore it
+	BEQ cont ; and pass it to original proc, which will cancel stock QL's timer
 
 	; now launch app: get its info -
 	; R0 holds button id, which we use as bank id,
