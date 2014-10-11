@@ -33,8 +33,8 @@
 
 	global log_r1
 	PUSH {LR,R0-R3}
-	ADR R1, sR1
 	MOV R2,R1
+	ADR R1, sR1
 	B cont
 
 	global log_r3
