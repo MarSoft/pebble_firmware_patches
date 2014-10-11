@@ -27,25 +27,28 @@
 {
 	global log_r0
 	PUSH {LR,R0-R3}
+	ADR R1, sR0
 	MOV R2, R0
 	B cont
 
 	global log_r1
 	PUSH {LR,R0-R3}
+	ADR R1, sR1
 	MOV R2,R1
 	B cont
 
 	global log_r3
 	PUSH {LR,R0-R3}
+	ADR R1, sR3
 	MOV R2,R3
 	B cont
 
 	global log_r2
 	PUSH {LR,R0-R3}
+	ADR R1, sR2
 
 	cont:
 	MOV R0, 1
-	ADR R1, str
 	ADR R3, str
 	BL app_log
 	POP {PC,R0-R3}
@@ -53,6 +56,15 @@
 	ALIGN 4
 	str:
 	DCB "Debug" 00
+	ALIGN 4
+	sR0:
+	DCB "R0 " 00
+	sR1:
+	DCB "R1 " 00
+	sR2:
+	DCB "R2 " 00
+	sR3:
+	DCB "R3 " 00
 }
 
 #endif ; _applog_h
