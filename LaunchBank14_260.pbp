@@ -62,8 +62,6 @@ c0 d1 80 00 @
 
 	; check current button
 	LDRB R0, [R5]
-#include includes/app_log_260.pbi
-BL log_r0
 	CBNZ R0, notupdate
 	; let's handle both press and release events for timer update.
 	; I.e. update counter even on Release events.
@@ -71,7 +69,6 @@ BL log_r0
 
 	; update counter only if this was Back btn
 	STR R1, [R2] ; update counter value
-BL log_r1
 	B updated
 
 	notupdate:
@@ -81,13 +78,11 @@ BL log_r1
 	; check diff
 	SUB R1, R1, R4 ; calculate diff
 	MOV.W R3, 500 ; delay in millis
-BL log_r1 ; log the diff
 	CMP R1, R3
 	BHI cont ; if diff is too large, pass this button to original proc
 
 	; now check if it is release event
 	LDRB R1, [R5,9]
-BL log_r1
 	CMP R1, 5
 	BEQ cont ; and pass it to original proc, which will cancel stock QL's timer
 
