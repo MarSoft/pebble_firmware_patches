@@ -58,13 +58,16 @@
 	DCB "Debug" 00
 	ALIGN 4
 	sR0:
-	DCB "R0 " 00
+	DCB "R0" 00
+	ALIGN 4
 	sR1:
-	DCB "R1 " 00
+	DCB "R1" 00
+	ALIGN 4
 	sR2:
-	DCB "R2 " 00
+	DCB "R2" 00
+	ALIGN 4
 	sR3:
-	DCB "R3 " 00
+	DCB "R3" 00
 }
 
 #endif ; _applog_h
