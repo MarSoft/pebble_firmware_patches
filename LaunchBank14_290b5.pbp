@@ -1,0 +1,118 @@
+; This patch changes behaviour of the Back button
+; in watchfaces:
+; If you (from any watchface)
+; press Back button and shortly after then any button,
+; it will launch an app installed in bank N,
+; where N is a button ID (Back=0, Up=1, Select=2, Down=3).
+; I.e. you can turn on backlight with Back button alone,
+; launch app0 with Back-Back,
+; launch app1 with Back-Up, app2 with Back-Select
+; and app3 with Back-Down.
+; You may choose which app is installed in which bank
+; by uninstalling and reinstalling apps in desired order.
+; This is greatly simplified since 2.0 app with Locker.
+#ver 270
+
+; just a simple mask to find named proc
+08 4b 10 b5 04 46 18 68 58 b1 {
+	proc app_manager_get_bank_info 
+}
+
+08 b5 ?12 @
+0a 46 01 21 ?4 {
+	proc app_manager_launch 
+}
+
+37 B5 0D 46 04 46 0D F1 02 01 01 A8 {
+	proc time_ms
+}
+
+; This matches some SerialConsole-related proc
+; which references memory address used for serial console read buffer.
+; We will use this address to store timer value.
+;08 48 bd e8 70 40 ?4 07 48 ?4 bd e8 70 40 01 20 ?4 00 bf @ ?4 {
+01 4b 18 70 70 47 00 bf @ ?4
+08 b5 02 4b 5b 68 98 47 08 bd {
+	val counter_ptr
+}
+
+; This matches middle of watchface_button_handler proc.
+03 7f cb b9 @ 61 7a 23 78 0c 48 04 29 {
+	; was: LDRB R1,[R4,#9]
+	;      LDRB R3,[R4]
+	B.W my_code
+	global continue ; and will return here if we wouldn't like to consume button :)
+}
+
+; and append our code
+{
+	proc my_code
+
+	PUSH {R0-R5} ; save registers
+
+	; We can use: R0,R1,R2,R3,R4
+	; R4 is button event struct
+
+	; check if this is first or subsequent btn press
+	LDR R0, counter
+	LDR R5, [R0] ; get old counter value
+	MOV R1, 0
+	BL time_ms
+	LDR R2, counter
+	LDR R1, [R2]
+	MOV.W R3, 1000
+	MUL R1, R3 ; convert seconds to millis
+	ADD R1, R0 ; now R1 contains full timestamp
+
+	; check current button
+	LDRB R0, [R4]
+	CBNZ R0, notupdate
+	; let's handle both press and release events for timer update.
+	; I.e. update counter even on Release events.
+	; This may help users.
+
+	; update counter only if this was Back btn
+	STR R1, [R2] ; update counter value
+	B updated
+
+	notupdate:
+	STR R5, [R2] ; restore old value
+	
+	updated:
+	; check diff
+	SUB R1, R1, R5 ; calculate diff
+	MOV.W R3, 500 ; delay in millis
+	CMP R1, R3
+	BHI cont ; if diff is too large, pass this button to original proc
+
+	; now check if it is release event
+	LDRB R1, [R4,9]
+	CMP R1, 5
+	BEQ cont ; and pass it to original proc, which will cancel stock QL's timer
+
+	; now launch app: get its info -
+	; R0 holds button id, which we use as bank id,
+	; i.e. launch app from bank 0..3 depending on button
+	BL app_manager_get_bank_info
+	CBZ R0, ret ; if no such app, just return
+	LDR R0, [R0,0x10] ; get app id from bank info
+	BL app_manager_launch
+
+	ret: ; terminate proc
+	POP {R0-R5} ; just to restore stack pointer
+	POP {R4,PC}
+
+	cont: ; return to original proc and let it handle this button
+	POP {R0-R5} ; restore registers
+	; reexecute replaced code
+	LDRB R1,[R4,9]
+	LDRB R3,[R4]
+	B.W continue
+
+	; ---------------------------
+
+	; data block
+	ALIGN 4
+	counter: ; memory location for click counter. 
+	DCD counter_ptr ; this should be a serial console's read buffer
+}
