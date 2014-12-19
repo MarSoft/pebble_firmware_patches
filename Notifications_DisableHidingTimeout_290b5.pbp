@@ -1,0 +1,22 @@
+; When Pebble receives new notification,
+; it will be shown on the screen for 3 minutes.
+; After that, if no other notification received,
+; it will be hidden and user will be returned to
+; main watchface.
+; This patch disables that timeout,
+; so that received notification will stay on the screen
+; until user manually closes it.
+;
+; Thanks to Svein Andre Nilsen for the idea.
+; 
+; This patch may not work for all the notifications,
+; because there were several places in code
+; which schedule notification hiding.
+#ver 290
+
+; notifications_schedule_hiding function:
+90 f8 74 32 10 b5 04 46  5b b9 90 f8 75 32 43 b1
+{
+	; just don't schedule timer and do nothing
+	db 70 47 ; BX LR
+}
