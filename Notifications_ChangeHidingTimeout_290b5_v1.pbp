@@ -1,0 +1,32 @@
+; When Pebble receives new notification,
+; it will be shown on the screen for 3 minutes.
+; After that, if no other notification received,
+; it will be hidden and user will be returned to
+; main watchface.
+; This patch increases that timeout
+; from 3 minutes to given timeout, 10 minutes by default.
+#ver 290
+
+; this is an option description to be used in site interface.
+; math syntax after space controls bounds and conversion:
+; bounds are 0..70000, and option should be set to val*60000 (to convert from ms to minutes)
+;@notification_hiding_timeout_ms val(0..70000)*60000
+; Desired notification hiding timeout.
+; Stock default: 5 minutes.
+;;
+; New timeout to set; defaults to 600000 milliseconds, or 10 minutes
+; #default is almost equivalent to #ifndef..#define..#endif,
+; but will set value if user passed only name.
+#default notification_hiding_timeout_ms 600000
+; maximum possible value is 4294967296, i.e. more than 71582 minutes
+
+; end of notifications_schedule_hiding function:
+90 f8 74 32 10 b5 04 46  5b b9 90 f8 75 32 43 b1
+d0 f8 70 02 03 49 04 4a  23 46 ?4 c4 f8 70 02 10 bd
+@ 20 bf 02 00 ; and the timeout value in milliseconds
+{
+	; replace timeout with our value.
+	; default is 180000 which means 3min
+	; let's set it to 10 minutes:
+	DCD ${notification_hiding_timeout_ms}
+}
