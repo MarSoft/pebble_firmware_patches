@@ -11,7 +11,7 @@
 ; You may choose which app is installed in which bank
 ; by uninstalling and reinstalling apps in desired order.
 ; This is greatly simplified since 2.0 app with Locker.
-#ver 270
+#ver 290
 
 ; just a simple mask to find named proc
 08 4b 10 b5 04 46 18 68 58 b1 {

@@ -1,7 +1,6 @@
 ; This patch allows to selectively disable
 ; certain built-in apps.
-; For firmware 2.5.0.
-#ver 250
+#ver 290
 ;!internal
 
 ; The stock order is:

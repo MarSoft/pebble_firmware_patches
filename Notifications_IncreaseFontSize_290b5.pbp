@@ -1,5 +1,5 @@
 ; This patch increases "Large" font in notifications.
-#ver 200
+#ver 290
 
 ; Font names:
 "RESOURCE_ID_GOTHIC_14" 00 {
