@@ -1,0 +1,60 @@
+; This patch increases "Large" font in notifications.
+#ver 200
+
+; Font names:
+"RESOURCE_ID_GOTHIC_14" 00 {
+	proc gothic_14
+}
+"RESOURCE_ID_GOTHIC_14_BOLD" 00 {
+	proc gothic_14_b
+}
+"RESOURCE_ID_GOTHIC_18" 00 {
+	proc gothic_18
+}
+"RESOURCE_ID_GOTHIC_18_BOLD" 00 {
+	proc gothic_18_b
+}
+"RESOURCE_ID_GOTHIC_24" 00 {
+	proc gothic_24
+}
+"RESOURCE_ID_GOTHIC_24_BOLD" 00 {
+	proc gothic_24_b
+}
+"RESOURCE_ID_GOTHIC_28" 00 {
+	proc gothic_28
+}
+"RESOURCE_ID_GOTHIC_28_BOLD" 00 {
+	proc gothic_28_b
+}
+
+; near the end of settings_notifications_init? proc
+01 23 15 22 84 f8 8c 36
+@ c4 f8 90 96 c4 f8 94 86 c4 f8 98 76 c4 f8 9c 06
+{
+	; was:
+	; STR.W R9, [R4,notif_style_large.text_font]
+	; STR.W R8, [R4,notif_style_large.title_font]
+	; STR.W R7, [R4,notif_style_large.subtitle_font]
+	; STR.W R0, [R4,notif_style_large.topic_font]
+	NOP ;1
+	NOP
+	NOP ;2
+	NOP
+	NOP ;3
+	NOP
+	B.W my_code
+	global cont
+}
+
+{
+	proc my_code
+	; loaded fonts:
+	; R9: 18; R8: 28b; R7: 28; R0: 24b
+	STR.W R7, [R4,0x690] ; text
+	STR.W R8, [R4,0x694] ; title
+	STR.W R7, [R4,0x698] ; subtitle
+	STR.W R8, [R4,0x69C] ; topic
+	B.W cont
+
+	; TODO: update R2 (0x15) and R3 (0x1) and R5 (0) if needed, for metadata changes
+}
