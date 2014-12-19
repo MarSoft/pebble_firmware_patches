@@ -5,6 +5,10 @@
 ; main watchface.
 ; This patch increases that timeout
 ; from 3 minutes to given timeout, 10 minutes by default.
+; 
+; This patch may not work for all the notifications,
+; because there were several places in code
+; which schedule notification hiding.
 #ver 290
 
 ; this is an option description to be used in site interface.
