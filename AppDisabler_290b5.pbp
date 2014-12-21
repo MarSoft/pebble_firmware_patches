@@ -4,33 +4,41 @@
 ;!internal
 
 ; The stock order is:
-; 1. Sliding Text Watch
-; 2. Classic Analog
-; 3. Simplicity
-; 4. Music
-; 5. Notifications
-; 6. Sports				-unremovable
-; 7. Golf				-unremovable
-; 8. Alarms
-; 9. Watchfaces
-; 10.Settings			-unremovable
-; 11.Getting Started	-unremovable
-; 12.Date & Time		-unremovable
-; 13.QuickLaunch		-unremovable
-; Total: 7 changeable apps
+; 1. Simplicity
+; 2. Music
+; 3. Notifications
+; 4. Alarms
+; 5. Watchfaces
+; 6.Settings		-unremovable
+; 7.Getting Started	-unremovable
+; 8.Date & Time		-unremovable
+; 9.QuickLaunch		-unremovable
+; Total: 5 changeable apps
+;
+; Also there are apps built into resources.
+; Their icons are also stored in resources.
+; 75 (icon 5): Sliding Text Watch
+; 76 (icon 6): Classic Analog
+; 77 (icon 24): Golf
+; 78 (icon 23): Sports
 
 ; Usage:
-; Supply appcount variable (7..0)
+; Supply appcount variable (5..0)
 ; and corresponding number of appN variables
 ; containing app names in desired order.
 ; Note that they will be arranged in reverse order!
-; If appcount == e.g. 6, then app7 will not be used. Etc.
+; If appcount == e.g. 4, then app5 will not be used. Etc.
 #default appcount 5
 #default app5 simplicity
 #default app4 music
 #default app3 notifications
 #default app2 alarms
 #default app1 watchfaces
+
+; And you can disable resource-builtin watchfaces as well:
+#default rescount 2
+#default res2 textwatch
+#default res1 classicanalog
 
 ; This is the app list
 02 6d 90 54
@@ -51,9 +59,29 @@
 	DCD app_${app1}
 }
 
+; This is the app-in-resources list
+4b 00 00 00 05 00 00 00 4c 00 00 00 06 00 00 00
+4d 00 00 00 18 00 00 00 4e 00 00 00 17 00 00 00
+{
+	val res_textwatch_b ; binary
+	DCD res_${res2}_b
+	val res_textwatch_i ; icon
+	DCD res_${res2}_i
+	val res_classicanalog_b ; binary
+	DCD res_${res1}_b
+	val res_classicanalog_i ; icon
+	DCD res_${res1}_i
+}
+
 ; Now update the "skip byte", which is actually MOV operator
 ; it is in app_install_manager_init proc
 10 b5 @ 00 24 09 4b e3 58 98 47 {
 	; was: MOV R4, 0
 	MOV R4, 5-${appcount}*4 ; will be calculated in order specified, i.e. (5-appcount)*4
+}
+; And skip byte for resource-based apps
+24 2c f7 d1 ? 00 24
+06 4b 1a 19 e0 58 51 68 08 34 {
+	; was: MOV R4, 0
+	MOV R4, 2-${rescount}*8
 }
