@@ -80,8 +80,7 @@
 	MOV R4, 5-${appcount}*4 ; will be calculated in order specified, i.e. (5-appcount)*4
 }
 ; And skip byte for resource-based apps
-24 2c f7 d1 ? 00 24
-06 4b 1a 19 e0 58 51 68 08 34 {
+00 24 06 4b 1a 19 e0 58 {
 	; was: MOV R4, 0
 	MOV R4, 2-${rescount}*8
 }
