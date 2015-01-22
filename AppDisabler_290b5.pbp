@@ -41,7 +41,7 @@
 #default res1 classicanalog
 
 ; This is the app list
-02 6d 90 54
+54
 @ ?36
 4b 00 00 00 05 00 00 00 4c 00 00 00
 {
