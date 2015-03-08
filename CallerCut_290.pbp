@@ -1,0 +1,41 @@
+; This patch fixes CallerID not showing
+; when utf8 string with non-even bytes count
+; gets cut at 32bytes (buffer size).
+#ver 290
+
+; patch function phone_ui_set_callerid_name
+38 b5 08 4b @ 01 46 1d 68 20 22 05 f5 b6 74 {
+	; was: MOV R1,R0; LDR R5,[R3]
+	B.W my_code
+	global cont
+}
+
+{
+	proc my_code
+	; in R0 we have a pointer to string
+	; R3 is occupied, others are unused
+
+	MOV R1, R0 ; save original pointer
+	findend:
+	LDRB R2, [R0]
+	ADD R0, 1
+	CBNZ R2, findend
+	SUB R0, 2
+	; now R0 points to last significant byte of the string
+
+	; find last starting byte
+	remove:
+	MOV R4, 7
+	findend:
+	LDRB R2, [R0]
+	LSR R2, R4, R2 ; R2 = R2 >> R4
+	XOR R2, 1
+	SUB R4, 1
+	CBNZ R2, findend
+	SUB R2, 6, R4 ; R2 = 6 - R4 ; count of additional bytes
+
+	; re-execute overwriten operations
+	; -- already done: MOV R1, R0
+	LDR R5, [R3]
+	B.W cont
+}
