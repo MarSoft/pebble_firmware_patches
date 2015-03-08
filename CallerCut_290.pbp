@@ -19,7 +19,9 @@
 	findend:
 	LDRB R2, [R0]
 	ADD R0, 1
-	CBNZ R2, findend
+	CBZ R2, end_found
+	B findend
+	end_found:
 	SUB R0, 2
 	; now R0 points to last significant byte of the string
 
