@@ -23,17 +23,22 @@
 	SUB R0, 2
 	; now R0 points to last significant byte of the string
 
-	; find last starting byte
-	remove:
-	MOV R4, 7
-	findend:
 	LDRB R2, [R0]
-	LSR R2, R4, R2 ; R2 = R2 >> R4
-	XOR R2, 1
-	SUB R4, 1
-	CBNZ R2, findend
-	SUB R2, 6, R4 ; R2 = 6 - R4 ; count of additional bytes
+	; one-byte?
+	MOV R4, 7
+	LSR R4, R2 ; R4 = R2 >> 7
+	CBZ R4, good ; one-byte character
+	; continuation? (FIXME: maybe need more than one continuation)
+	MOV R4, 6
+	LSR R4, R2 ; R4 = R2 >> 6
+	AND R4, R4, 1 ; 6th bit will be 0 for continuation byte
+	CBZ R4, good ; continuation - consider it normal (FIXME)
 
+	; now we know it is a lonely starting byte; something is wrong, so clear it!
+	MOV R2, 0
+	STRB R2, [R0]
+
+	good:
 	; re-execute overwriten operations
 	; -- already done: MOV R1, R0
 	LDR R5, [R3]
