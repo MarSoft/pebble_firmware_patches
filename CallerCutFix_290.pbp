@@ -10,6 +10,8 @@
 	global cont
 }
 
+#include includes/app_log_260.pbi
+
 {
 	proc my_code
 	; in R0 we have a pointer to string
@@ -18,26 +20,36 @@
 	MOV R1, R0 ; save original pointer
 	findend:
 	LDRB R2, [R0]
-	ADD R0, 1
 	CBZ R2, end_found
+	ADD R0, 1
 	B findend
 	end_found:
-	SUB R0, 2
+	SUB R0, 1
 	; now R0 points to last significant byte of the string
 
+	; if strlen < 31 then string was not trimmed - don't do anything with it
+	SUB R2, R0, R1 ; strlen-1
+BL log_r2
+	CMP R2, 30
+	BLT good ; lesser than
+
 	LDRB R2, [R0]
+BL log_r2
 	; one-byte?
 	MOV R4, 7
 	LSR R4, R2 ; R4 = R2 >> 7
+BL log_r4
 	CBZ R4, good ; one-byte character
 	; continuation? (FIXME: maybe need more than one continuation)
 	MOV R4, 6
 	LSR R4, R2 ; R4 = R2 >> 6
 	AND R4, R4, 1 ; 6th bit will be 0 for continuation byte
+BL log_r4
 	CBZ R4, good ; continuation - consider it normal (FIXME)
 
 	; now we know it is a lonely starting byte; something is wrong, so clear it!
 	MOV R2, 0
+BL log_r2
 	STRB R2, [R0]
 
 	good:
