@@ -43,6 +43,12 @@
 	MOV R2,R3
 	B cont
 
+	global log_r4
+	PUSH {LR,R0-R3}
+	MOV R2,R4
+	ADR R1, sR4
+	B cont
+
 	global log_r2
 	PUSH {LR,R0-R3}
 	ADR R1, sR2
@@ -68,6 +74,9 @@
 	ALIGN 4
 	sR3:
 	DCB "R3" 00
+	ALIGN 4
+	sR4:
+	DCB "R4" 00
 }
 
 #endif ; _applog_h
