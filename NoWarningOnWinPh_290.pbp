@@ -1,0 +1,16 @@
+; Remove «Please update your mobile application» warning.
+; For Windows Phone users.
+
+#ver 290
+
+; disable conditional jump in mobile_version_ui_... sub
+bd f8 12 10 bd f8 10 30  00 91 bd f8 0e 20 0b 48
+21 21 ?4        @ bd f8  0e 30 01 2b 0a d8 08 4d
+{
+	; was:
+	; LDRH.W R3, ...
+	; CMP R3, 1
+	; BHI ...
+	MOV R3, 2
+	NOP
+}
