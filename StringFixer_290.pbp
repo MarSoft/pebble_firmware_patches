@@ -5,6 +5,11 @@
 #ver 290
 
 ; utf8_validate_do proc
+@ 13 b5 08 b9 00 20 12 e0  00 23 01 93 8d f8 03 30 {
+	; was: PUSH {R0,R1,R4,LR}
+	B.W my_code0
+	global cont0
+}
 13 b5 08 b9 00 20 12 e0  00 23 01 93 8d f8 03 30
 04 46 20 46 @ 14 f8 01 2b {
 	B.W my_code1
@@ -18,10 +23,16 @@
 }
 
 {
+	proc my_code0
+	PUSH {R0,R1,R4,LR}
+	PUSH {R5} ; free it up for our use
+	B.W cont0
+	
+	ALIGN 4
 	proc my_code1
 	LDRB R1, [SP, 3] ; state
 	CBNZ R1, nosave
-	MOV R3, R4 ; for each 0-state (when str is valid) save its ending pos
+	MOV R5, R4 ; for each 0-state (when str is valid) save its ending pos
 	nosave:
 	LDRB R2, [R4], 1
 	B.W cont1
@@ -29,18 +40,21 @@
 	ALIGN 4
 	proc my_code2
 	LDR R4, ramaddr
-	CMP R3, R4
+	CMP R5, R4
 	BLE rom
 
 	; now that string is in ram, rewrite ending byte
 	MOV R4, 0
 	STRB R4, [R3, 0]
 	MOV R3, 0 ; now state is definitely 0=good
-	B.W cont2
+	B done
 
 	rom:
 	; string is in rom -> cannot fix, so just repeat overwritten code
 	LDRB R3, [SP, 3] ; state
+
+	done:
+	POP {R5} ; we no longer use it so restore it
 	B.W cont2
 
 	ALIGN 4
