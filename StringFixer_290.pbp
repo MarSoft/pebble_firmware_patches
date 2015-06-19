@@ -52,7 +52,7 @@ BL log_r4
 
 	; now that string is in ram, rewrite ending byte
 	MOV R4, 0
-	STRB R4, [R3, 0]
+	STRB R4, [R5]
 	MOV R3, 0 ; now state is definitely 0=good
 	B done
 
