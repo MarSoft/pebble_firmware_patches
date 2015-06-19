@@ -22,9 +22,8 @@
 }
 13 b5 08 b9 00 20 12 e0  00 23 01 93 8d f8 03 30
 04 46 20 46 14 f8 01 2b  2a b1 0d f1 03 00 01 a9
-?4 f5 e7 9d f8 03 30  00 2b ea d1 @ 02 b0 10 bd {
+?4 f5 e7 9d f8 03 30  00 2b ea d1 02 b0 @ 10 bd {
 	; ending sequence
-	ADD SP, SP, 8
 	POP {R4,R5,PC}
 }
 
