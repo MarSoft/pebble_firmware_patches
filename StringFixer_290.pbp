@@ -21,15 +21,29 @@
 	proc my_code1
 	LDRB R1, [SP, 3] ; state
 	CBNZ R1, nosave
-	MOV R3, R4
+	MOV R3, R4 ; for each 0-state (when str is valid) save its ending pos
 	nosave:
 	LDRB R2, [R4], 1
 	B.W cont1
 
 	ALIGN 4
 	proc my_code2
+	LDR R4, ramaddr
+	CMP R3, R4
+	BLE rom
+
+	; now that string is in ram, rewrite ending byte
 	MOV R4, 0
-	STRB R4, [R3]
-	MOV R3, 0
+	STRB R4, [R3, 1]
+	MOV R3, 0 ; now state is definitely 0=good
 	B.W cont2
+
+	rom:
+	; string is in rom -> cannot fix, so just repeat overwritten code
+	LDRB R3, [SP, 3] ; state
+	B.W cont2
+
+	ALIGN 4
+	ramaddr:
+	DCD 0x20000000
 }
