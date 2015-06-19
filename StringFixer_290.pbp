@@ -51,9 +51,8 @@ BL log_r4
 	BLE rom
 
 	; now that string is in ram, rewrite ending byte
-	MOV R4, 0
-	STRB R4, [R5]
 	MOV R3, 0 ; now state is definitely 0=good
+	STRB R3, [R5]
 	B done
 
 	rom:
