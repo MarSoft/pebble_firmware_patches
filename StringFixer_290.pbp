@@ -32,20 +32,12 @@
 	LDRB R1, [SP, 3] ; state
 	CBNZ R1, nosave
 	MOV R5, R4 ; for each 0-state (when str is valid) save its ending pos
-#include includes/app_log_260.pbi
-BL log_r1
-BL log_r4
 	nosave:
 	LDRB R2, [R4], 1
 	B.W cont1
 
 	ALIGN 4
 	proc my_code2
-BL log_r0
-BL log_r4
-BL log_r3
-LDR R4, [SP, 4]
-BL log_r4
 	LDR R4, ramaddr
 	CMP R5, R4
 	BLE rom
