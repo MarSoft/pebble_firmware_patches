@@ -24,7 +24,8 @@
 04 46 20 46 14 f8 01 2b  2a b1 0d f1 03 00 01 a9
 ?4 f5 e7 9d f8 03 30  00 2b ea d1 @ 02 b0 10 bd {
 	; ending sequence
-	B.W my_code3
+	ADD SP, SP, 8
+	POP {R4,R5,PC}
 }
 
 {
@@ -57,9 +58,4 @@
 	ALIGN 4
 	ramaddr:
 	DCD 0x20000000
-
-	ALIGN 4
-	proc my_code3
-	ADD SP, SP, 8
-	POP {R4,R5,PC}
 }
