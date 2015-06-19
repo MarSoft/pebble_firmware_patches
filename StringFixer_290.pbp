@@ -24,8 +24,12 @@
 
 {
 	proc my_code0
-	PUSH {R0,R1,R4,LR}
+	; was: PUSH {R0,R1,R4,LR}
+	; we split it and put R5 in middle
+	PUSH {R4,LR}
 	PUSH {R5} ; free it up for our use
+	PUSH {R0,R1}
+	; now stack is: R0(char) R1(state) R5 R4 LR [rest]
 	B.W cont0
 	
 	ALIGN 4
@@ -33,12 +37,20 @@
 	LDRB R1, [SP, 3] ; state
 	CBNZ R1, nosave
 	MOV R5, R4 ; for each 0-state (when str is valid) save its ending pos
+#include includes/app_log_260.pbi
+BL log_r1
+BL log_r4
 	nosave:
 	LDRB R2, [R4], 1
 	B.W cont1
 
 	ALIGN 4
 	proc my_code2
+BL log_r0
+BL log_r4
+BL log_r3
+LDR R4, [SP, 4]
+BL log_r4
 	LDR R4, ramaddr
 	CMP R5, R4
 	BLE rom
@@ -54,7 +66,9 @@
 	LDRB R3, [SP, 3] ; state
 
 	done:
+	ADD SP,SP,8
 	POP {R5} ; we no longer use it so restore it
+	SUB SP,SP,8 ; to be re-added in proc end
 	B.W cont2
 
 	ALIGN 4
