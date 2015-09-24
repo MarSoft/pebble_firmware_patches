@@ -1,10 +1,10 @@
 ; This patch allows using different colors for different characters
 
 ; text_render_draw_char proc
-97 f8 31 10 97 f8 30 00  01 f0 07 01 05 29 35 d0 {
+97 f8 31 10 97 f8 2f 00  01 f0 07 01 05 29 ? d0 {
 	; was:
 	; LDRB.W R1, [R7, 0x31] ; compositing_mode
-	; LDRB.W R0, [R7, 0x30] ; text_color
+	; LDRB.W R0, [R7, 0x2F] ; text_color - or fill_color?
 
 	B.W my_code
 	global cont
