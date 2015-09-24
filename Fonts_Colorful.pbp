@@ -1,0 +1,22 @@
+; This patch allows using different colors for different characters
+
+; text_render_draw_char proc
+97 f8 31 10 97 f8 30 00  01 f0 07 01 05 29 35 d0 {
+	; was:
+	; LDRB.W R1, [R7, 0x31] ; compositing_mode
+	; LDRB.W R0, [R7, 0x30] ; text_color
+
+	B.W my_code
+	global cont
+}
+
+{
+	proc my_code
+	; let's just replace color with static value
+	MOV R0, 0xF0 ; a:11 r:11 g:00 b:00
+
+	; now load compositing mode...
+	LDRB R1, [R7, 0x31]
+	; and jump
+	B.W cont
+}
