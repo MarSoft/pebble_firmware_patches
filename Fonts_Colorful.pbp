@@ -1,27 +1,21 @@
 ; This patch allows using different colors for different characters
 
-; hook into beginning of that same proc
-82 b0 2d e9 f0 4f @ 99 b0 07 46 {
-	; was:
-	;SUB SP, SP, 0x64
-	;MOV R7, R0
+; text_layout_render_char proc, ending
+05 9b ea 68 30 46 21 46  bd e8 70 40 02 b0 @ ?4 {
+	; was: B.W text_render_draw_char
+	B.W my1
+}
 
-	B.W mycode2
-	global cont2
+82 b0 2d e9 f0 4f 99 b0 {
+	proc text_render_draw_char
 }
 
 {
-	global mycode2
-	; can use R5-R11
-	; R1 is codepoint
-	; R0 is ctx
-
-	; let's just use codepoint last byte as color
+	global my1
+	; R0: ctx
+	; R1: codepoint
+	; R2: ?
+	; R3: origin pos
 	STRB R1, [R0, 0x2f]
-;	BL log_r1
-	
-	SUB SP,SP,0x64
-	MOV R7, R0
-
-	B.W cont2
+	B.W text_render_draw_char
 }
