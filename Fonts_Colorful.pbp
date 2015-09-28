@@ -57,7 +57,10 @@
 	ADR R4, table
 	LDRB R4, [R4, R1] ; color = table[letter]
 
-	; TODO: check for bg color
+	; check for bg color
+	LDRB R5, [R0, 0x2e] ; fill color - we suppose it equals to bg. FIXME?
+	CMP R5, R4 ; TODO: fuzzy comparsion
+	BEQ default ; if new fg == bg then use default fg instead
 
 	B setcolor
 
