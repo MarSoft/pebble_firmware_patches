@@ -5,8 +5,18 @@
 	; was:
 	; SUB SP,SP,0x4C
 	; MOV R4, R0
+	; free to use: R4-R7
 	B.W my_gdc
 	global cont_gdc
+}
+; graphics_draw_text, ending
+13 b0 @ bd e8 f0 40 02 b0 70 47 {
+	;ADD SP,SP,0x4C
+	; was:
+	;POP.W {R4-R7,LR}
+	;ADD SP,SP,8
+	;BX LR
+	B.W my_gdce
 }
 
 ; text_layout_render_char proc, ending
@@ -22,14 +32,31 @@
 {
 	global my_gdc
 
-	; store current text color in neighbour byte (fixme?)
-	LDRB R4, [R0, 0x2f]
-	STRB R4, [R0, 0x30]
+	; save current graphics context values which we'll overwrite into stack
+	LDRB R4, [R0, 0x2d] ; stroke color
+	PUSH {R4}
+	; store current text color in stroke color byte (fixme?)
+	LDRB R4, [R0, 0x2f] ; text color
+	STRB R4, [R0, 0x2d] ; save it as stroke color
 
 	; reexec..
 	SUB SP,SP,0x4C
 	MOV R4, R0
 	B.W cont_gdc
+
+;--
+
+	ALIGN 4
+	global my_gdce
+	; restore graphics context
+	; here R4 is graphics context, and R1-R3,R5-R7 are free to use
+	POP {R1}
+	STRB R1, [R4, 0x2d] ; stroke color
+
+	; reexecute
+	POP {R4-R7,LR}
+	ADD SP,SP,8
+	BX LR
 
 ;--
 
@@ -65,7 +92,7 @@
 	B setcolor
 
 	default:
-	LDRB R4, [R0, 0x30] ; load pre-saved default color
+	LDRB R4, [R0, 0x2d] ; load pre-saved default color
 
 	; set that color as font color
 	setcolor:
