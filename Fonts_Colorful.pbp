@@ -57,9 +57,9 @@
 	ADR R4, table
 	LDRB R4, [R4, R1] ; color = table[letter]
 
-	B setcolor
-
 	; TODO: check for bg color
+
+	B setcolor
 
 	default:
 	LDRB R4, [R0, 0x30] ; load pre-saved default color
