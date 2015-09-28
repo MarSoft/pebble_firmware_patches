@@ -66,6 +66,7 @@
 	; R1: codepoint
 	; R2: ?
 	; R3: origin pos
+#ifdef CodeAc
 	PUSH {R1,R4-R7}
 
 	; mapping table based on codepoint
@@ -111,4 +112,37 @@
 	db c0 c3 f0 c3 ; qrst
 	db f0 c0 c0 f0 ; uvwx
 	db f0 c0       ; yz
+#else
+#ifdef CodeB
+
+	; R0: ctx
+	; R1: codepoint
+	; R2: ?
+	; R3: origin pos
+	PUSH {R1,R4-R7}
+
+	; TODO
+
+	POP {R1,R4-R7}
+	B.W text_render_draw_char
+
+#else
+#ifdef CodeC
+
+	; R0: ctx
+	; R1: codepoint
+	; R2: ?
+	; R3: origin pos
+	PUSH {R1,R4-R7}
+
+	; TODO
+
+	POP {R1,R4-R7}
+	B.W text_render_draw_char
+
+#else
+Error: please specify desired coding
+#endif
+#endif
+#endif
 }
