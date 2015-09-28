@@ -6,38 +6,64 @@
 	; was:
 	; LDRB.W R0, [R7, 0x2F] ; text_color
 
-	B.W my_code
-	global cont
+;	B.W my1
+	global cont1
 }
 
-#include includes/app_log_260.pbi
-{
-	proc my_code
-	; let's just replace color with static value
-	MOV R0, 0xF0 ; a:11 r:11 g:00 b:00
+; hook into beginning of that same proc
+82 b0 2d e9 f0 4f @ 99 b0 07 46 {
+	; was:
+	;SUB SP, SP, 0x64
+	;MOV R7, R0
 
-	BL log_r1
-	BL log_r0
-
-	; and jump
-	B.W cont
-
-
-
-
-	ALIGN 4
-	global myc2
-	db 6b 4b
-	LDR R5, [R3]
-	MOV R1, R5
-	BL log_r1
-	B.W cont2
-}
-
-6b 4b 1d 68 35 b1 5b 68 {
-	; instead of text_char_drawing_callback
-	B.W myc2
+	B.W mycode2
 	global cont2
 }
 
-;82 b0 2d e9 f0 4f 
+; graphics_draw_text
+82 b0 f0 b5 @ 93 b0 04 46 {
+	B.W my3
+	global cont3
+}
+
+{
+	proc my1
+	; let's just replace color with static value
+	MOV R0, 0xF0 ; a:11 r:11 g:00 b:00
+
+;	BL log_r1
+;	BL log_r0
+
+	; and jump
+	B.W cont1
+
+
+	ALIGN 4
+	global mycode2
+	; can use R5-R11
+	; R1 is codepoint
+	; R0 is ctx
+
+	; let's just use codepoint last byte as color
+	STRB R1, [R0, 0x2f]
+;	BL log_r1
+	
+	SUB SP,SP,0x64
+	MOV R7, R0
+
+;POP {R4-R11,LR}
+;ADD SP,SP,8
+;BX LR
+
+	B.W cont2
+
+	
+	ALIGN 4
+	global my3
+	SUB SP,SP,0x4C
+;MOV R4, 0xFC
+;STR R4, [R0, 0x2f]
+	MOV R4, R0
+;	BL log_r0
+	B.W cont3
+}
