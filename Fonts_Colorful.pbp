@@ -137,6 +137,32 @@
 
 	; TODO
 
+#ifdef _comment
+init {
+	prev_bottom = 0;
+	prev_width = 0;
+}
+get_char_meta after {
+	have: new_top, new_left, new_width, new_height
+	have: prev_bottom, perv_width
+	ret_width = new_width ; for now
+	if new_top > prev_bottom:
+		ret_width = -prev_width ; is it possible?
+	prev_width = new_width
+	prev_bottom = new_top + new_height ; for next time
+	return: new_top, new_left, *ret_width*, new_height
+}
+draw_char before {
+	draw gray rect on new char rect? (but don't overwrite prev char)
+	draw white line on lower third of that same rect
+}
+	; 0. on start: reset prev char top & width
+	; 1. draw bg and/or lower line
+	; 1a. if curr/prev char is 'q', skip drawing line?
+	; FIX: how to avoid overwriting prev char? Maybe check for fg color?
+	; 2. when determining char metadata, check prev char;
+#endif
+
 	POP {R1,R4-R7}
 	B.W text_render_draw_char
 
