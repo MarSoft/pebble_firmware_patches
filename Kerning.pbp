@@ -99,8 +99,8 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	;CMP kern_height, R5
 	;BLT do_kerning
 	; for now do kerning for char%2=0
-	EOR R0, R2, 1 ; XOR
-	CBZ R0, do_kerning
+	CMP R2, 0x61 ; 'a'
+	BEQ do_kerning
 
 	regular:
 	POP {R0-R5,LR}
