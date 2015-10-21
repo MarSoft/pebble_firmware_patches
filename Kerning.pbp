@@ -1,0 +1,129 @@
+#ifdef _comment
+
+Whenever we need char advance:
+1. If this char is not-kernable, continue as always
+2. If it is kernable, check *next* char's codepoint
+3. If kerning applies, *curr* char advance shall be zero!
+4. ...and next char advance should be ideally max(curr_advance, next_advance)
+Possible problem: added '-' in wrapped word between kernable letters will be shifted on top of left letter
+
+#endif
+
+; iterate_line before main loop
+0a f1 34 02 06 92 10 46  f1 68 2a 46 @ ?4
+{
+	; was: BL text_layout_get_char_advance(first char)
+	; can use R3
+	B.W bef_main_loop
+	global bef_main_loop_cont
+}
+;iterate_line in main loop
+06 98 f1 68 cd f8 0c c0  2a 46 @ ?4
+{
+	; was: BL text_layout_get_char_advance(curr char)
+	B.W in_main_loop
+	global in_main_loop_cont
+}
+08 b5 03 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
+	proc iterator_next
+}
+08 b5 43 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
+	proc iterator_prev
+}
+70 b5 0e 46 14 46 05 46 {
+	proc text_layout_get_char_advance
+}
+{
+	global bef_main_loop
+	ADD R3, SP, 0x2C ; [pciter]
+	BL my_get_advance
+	B.W bef_main_loop_cont
+	ALIGN 4
+
+;--
+
+	global in_main_loop
+	ADD R3, SP, 0x2C ; [pciter]
+	BL my_get_advance
+	B.W in_main_loop_cont
+	ALIGN 4
+
+;--
+
+	global my_get_advance
+	; R0: text_ctx
+	; R1: font
+	; R2: curr codepoint
+	; R3: pciter
+	; R3+sizeof(Iterator): pciterextra
+	PUSH {R0-R5,LR}
+
+	; is font kernable?
+	;TODO
+	;BNE regular
+
+	; is R2 char kernable?
+	;TODO get char's kerning height
+	;BNE regular
+	;MOV R5, [kern height]
+
+	; load next char
+	MOV R4, R3 ; save iter
+	MOV R0, R4 ; iter
+	BL iterator_next
+	LDR R2, [R4, 0x28] ; sizeof(iterator)+pciterdata.char_iter_extra.currchardecoded
+
+	; restore pointer
+	PUSH {R0-R3}
+	MOV R0, R4 ; iter
+	BL iterator_prev
+	POP {R0-R3}
+
+	; can R2 char kern with prev one?
+	;TODO get char's herning height
+	;CMP kern_height, R5
+	;BLT do_kerning
+	; for now do kerning for char%2=0
+	EOR R0, R2, 1 ; XOR
+	CBZ R0, do_kerning
+
+	regular:
+	POP {R0-R5,LR}
+	B.W text_layout_get_char_advance
+
+	do_kerning:
+	POP {R0-R5,LR}
+	MOV R0, 0 ; zero advance
+	BX LR
+	ALIGN 4
+
+;--
+
+	global get_char_kern_height
+	; R0: codepoint
+	PUSH {R1-R4,LR}
+
+	CMP R0, 0x41 ; A
+	BCC zero
+	CMP R0, 0x7A ; z
+	BHI zero
+	CMP R0, 0x5A ; Z
+	BLS upper
+	CMP R0, 0x61 ; a
+	BCC zero ; in between Z..a
+	lower:
+	SUB R0, 0x20 ; convert to upper
+
+	upper:
+	; now R0 is A..Z; calculate kerning position
+
+	;TODO
+
+	B ret
+
+	zero:
+	MOV R0, 0
+
+	ret:
+	POP {R1-R4,PC}
+}
