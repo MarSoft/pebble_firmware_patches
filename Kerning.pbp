@@ -1,5 +1,6 @@
 #ifdef _comment
 
+Need to patch iterate_line and measure_word
 Whenever we need char advance:
 1. If this char is not-kernable, continue as always
 2. If it is kernable, check *next* char's codepoint
@@ -17,12 +18,18 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	B.W bef_main_loop
 	global bef_main_loop_cont
 }
-;iterate_line in main loop
+; iterate_line in main loop
 06 98 f1 68 cd f8 0c c0  2a 46 @ ?4
 {
 	; was: BL text_layout_get_char_advance(curr char)
 	B.W in_main_loop
 	global in_main_loop_cont
+}
+; text_layout_measure_word in measuring loop
+07 f1 34 00 d9 f8 0c 10  0b 9a 26 89 @ ?4 {
+	; was: BL text_layout_get_char_advance(curr char)
+	B.W for_measure_word
+	global for_measure_word_cont
 }
 08 b5 03 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
 	proc iterator_next
@@ -46,6 +53,14 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	ADD R3, SP, 0x2C ; [pciter]
 	BL my_get_advance
 	B.W in_main_loop_cont
+	ALIGN 4
+
+;--
+
+	global for_measure_word
+	ADD R3, SP, 0x4 ; [pciter]
+	BL my_get_advance
+	B.W for_measure_word_cont
 	ALIGN 4
 
 ;--
