@@ -190,6 +190,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	; R1: table
 	; returns nonzero if kerning should apply
 	PUSH {R2-R3,LR}
+	BL kern_normalize
 	MOV R2, R0 ; codepoint
 
 	LDRB R0, [R1] ; counter
