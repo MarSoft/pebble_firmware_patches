@@ -118,13 +118,13 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	; R0: codepoint
 	PUSH {R1-R4,LR}
 
-	CMP R0, 0x41 ; A
+	CMP R0, 'A'
 	BCC zero
-	CMP R0, 0x7A ; z
+	CMP R0, 'z'
 	BHI zero
-	CMP R0, 0x5A ; Z
+	CMP R0, 'Z'
 	BLS upper
-	CMP R0, 0x61 ; a
+	CMP R0, 'a'
 	BCC zero ; in between Z..a
 	lower:
 	SUB R0, 0x20 ; convert to upper
