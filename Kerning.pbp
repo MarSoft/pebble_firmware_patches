@@ -41,6 +41,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	proc text_layout_get_char_advance
 }
 {
+	ALIGN 4
 	global bef_main_loop
 	ADD R3, SP, 0x2C ; [pciter]
 	BL my_get_advance
@@ -111,6 +112,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 }
 
 {
+	ALIGN 4
 	proc kern_normalize
 	; R0: codepoint
 	; returns: uppercase version of R0, or 0 if not letter
@@ -136,6 +138,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 }
 
 {
+	ALIGN 4
 	proc kern_get_table
 	; R0: char
 	PUSH {R1,LR}
@@ -162,6 +165,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	DCB 0 2 1 1 6 3 1 4
 	DCB 2 6 4 4 0 3 4 0 4 0
 
+	ALIGN 4
 	fullkern_opts:
 	DCD fk1  ;1
 	DCD fk2  ;2
@@ -179,6 +183,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 }
 
 {
+	ALIGN 4
 	proc kern_check
 	; R0: codepoint
 	; R1: table
