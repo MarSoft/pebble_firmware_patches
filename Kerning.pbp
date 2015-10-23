@@ -152,7 +152,8 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	CBZ R0, ret ; non-kernable letter
 
 	ADR R1, fullkern_opts
-	LDR R0, [R1,R0]
+	SUB R0, 1
+	LDR R0, [R1,R0,2] ; LSL #2
 
 	ret:
 	POP {R1,PC}
