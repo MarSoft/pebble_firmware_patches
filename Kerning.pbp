@@ -61,11 +61,10 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	ADD R3, SP, 0x4 ; [pciter]
 	BL my_get_advance
 	B.W for_measure_word_cont
-	ALIGN 4
+}
 
-;--
-
-	global my_get_advance
+{
+	proc my_get_advance
 	; R0: text_ctx
 	; R1: font
 	; R2: curr codepoint
@@ -78,29 +77,27 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	;BNE regular
 
 	; is R2 char kernable?
-	;TODO get char's kerning height
-	;BNE regular
-	;MOV R5, [kern height]
+	MOV R0, R2
+	BL kern_get_table
+	CBZ R0, regular ; no kerning
+	MOV R5, R0 ; kern table for this char
 
 	; load next char
 	MOV R4, R3 ; save iter
 	MOV R0, R4 ; iter
 	BL iterator_next
-	LDR R2, [R4, 0x28] ; sizeof(iterator)+pciterdata.char_iter_extra.currchardecoded
+	LDR R0, [R4, 0x28] ; sizeof(iterator)+pciterdata.char_iter_extra.currchardecoded
 
 	; restore pointer
-	PUSH {R0-R3}
+	PUSH {R0}
 	MOV R0, R4 ; iter
 	BL iterator_prev
-	POP {R0-R3}
+	POP {R0}
 
-	; can R2 char kern with prev one?
-	;TODO get char's herning height
-	;CMP kern_height, R5
-	;BLT do_kerning
-	; for now do kerning for char%2=0
-	CMP R2, 0x61 ; 'a'
-	BEQ do_kerning
+	; can R0 char kern with prev one?
+	MOV R1, R5 ; kern table for prev char
+	BL kern_check
+	CBNZ R0, do_kerning
 
 	regular:
 	POP {R0-R5,LR}
@@ -110,13 +107,13 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	POP {R0-R5,LR}
 	MOV R0, 0 ; zero advance
 	BX LR
-	ALIGN 4
 
-;--
+}
 
-	global get_char_kern_height
+{
+	proc kern_normalize
 	; R0: codepoint
-	PUSH {R1-R4,LR}
+	; returns: uppercase version of R0, or 0 if not letter
 
 	CMP R0, 'A'
 	BCC zero
@@ -130,17 +127,34 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	SUB R0, 0x20 ; convert to upper
 
 	upper:
-	; now R0 is A..Z; calculate kerning position
-
-	;TODO
-
-	B ret
+	; now R0 is A..Z
+	BX LR
 
 	zero:
 	MOV R0, 0
+	BX LR
+}
+
+{
+	proc kern_get_table
+	; R0: char
+	PUSH {R1,LR}
+
+	BL kern_normalize
+	CBZ R0, ret ; not a letter
+
+	SUB R0, 'A'
+	ADR R1, fullkern_tbl
+	LDRB R0, [R1,R0]
+	CBZ R0, ret ; non-kernable letter
+
+	ADR R1, fullkern_opts
+	LDR R0, [R1,R0]
 
 	ret:
-	POP {R1-R4,PC}
+	POP {R1,PC}
+
+;--
 
 	ALIGN 4
 	fullkern_tbl:
@@ -162,4 +176,24 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	fk14: DCB 14 'AEGHIJKLOQUXYZ'
 	fk16: DCB 16 'AEFGHIJKLOQUVXYZ'
 	fk20: DCB 20 'ACDEFGHIJKLNOQSUVXYZ'
+}
+
+{
+	proc kern_check
+	; R0: codepoint
+	; R1: table
+	; returns nonzero if kerning should apply
+	PUSH {R2-R3,LR}
+	MOV R2, R0 ; codepoint
+
+	LDRB R0, [R1] ; counter
+	cont:
+	LDRB R3, [R1,R0] ; tbl + counter - start with last char
+	CMP R3, R2
+	BEQ ret ; R0 (which is nonzero) will be returned
+	SUB R0, 1
+	BNE cont ; if not zero
+
+	ret:
+	POP {R2-R3,PC}
 }
