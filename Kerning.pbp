@@ -141,4 +141,60 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 
 	ret:
 	POP {R1-R4,PC}
+
+	ALIGN 4
+	table:
+	DCD a
+	DCD b
+	DCD c
+	DCD d
+	DCD e
+	DCD f
+	DCD g
+	DCD h
+	DCD i
+	DCD j
+	DCD k
+	DCD l
+	DCD m
+	DCD n
+	DCD o
+	DCD p
+	DCD q
+	DCD r
+	DCD s
+	DCD t
+	DCD u
+	DCD v
+	DCD w
+	DCD x
+	DCD y
+	DCD z
+
+	a: DCB 0
+	b: DCB 16 'AEFGHIJKLOQUVXYZ'
+	c: DCB 14 'AEGHIJKLOQUXYZ'
+	d: DCB 8 'AEGIOUXZ'
+	e: DCB 0
+	f: DCB 8 'AEGIOUXZ'
+	g: DCB 2 'IU'
+	h: DCB 8 'AEGIOUXZ'
+	i: DCB 0
+	j: DCB 2 'IU'
+	k: DCB 1 'U'
+	l: DCB 1 'U'
+	m: DCB 20 'ACDEFGHIJKLNOQSUVXYZ'
+	n: DCB 8 'AEGIOUXZ'
+	o: DCB 1 'U'
+	p: DCB 14 'AEGHIJKLOQUXYZ'
+	q: DCB 2 'IU'
+	r: DCB 20 'ACDEFGHIJKLNOQSUVXYZ'
+	s: DCB 14 'AEGHIJKLOQUXYZ'
+	t: DCB 14 'AEGHIJKLOQUXYZ'
+	u: DCB 0
+	v: DCB 8 'AEGIOUXZ'
+	w: DCB 14 'AEGHIJKLOQUXYZ'
+	x: DCB 0
+	y: DCB 14 'AEGHIJKLOQUXYZ'
+	z: DCB 0
 }
