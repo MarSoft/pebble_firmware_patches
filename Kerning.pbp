@@ -243,10 +243,10 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	MOV R6, R1 ; save linedata
 	LDR R7, [R2, 0xC] ; save font from tli
 	; save bg color
-	LDR R4, [R5, 0x2e] ; fill color
+	LDRB R4, [R5, 0x2e] ; fill color
 	; calculate new color based on original bg color
 	EOR R1, R4, 0b010101
-	STR R1, [R5, 0x2e] ; fill color
+	STRB R1, [R5, 0x2e] ; fill color
 
 	; load position for rect1
 	LDR R1, [R6, 4] ; box_curr_origin ; FIXME: un-apply offset?
@@ -263,12 +263,12 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	BL graphics_fill_rect ; R0: gctx, R1-R2: rect, R3: radius, a0: corn_mask
 
 	; restore fill color
-	STR R4, [R5, 0x2e]
+	STRB R4, [R5, 0x2e]
 
 	ADD SP, SP, 0x8
 	POP {R0-R6,LR}
 	B.W text_layout_iterate_line
 
-	db "v1" ; just for identification
+	db "v3" ; just for identification
 }
 
