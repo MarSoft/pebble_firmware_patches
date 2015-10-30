@@ -236,7 +236,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; R2: tli
 	; R3: render_char_cb
 
-	PUSH {R0-R6,LR}
+	PUSH {R0-R7,LR}
 	SUB SP, SP, 0x8 ; reserve space for arg0 of graphics_fill_rect and var0
 
 	MOV R5, R0 ; save gctx
@@ -282,7 +282,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	STRB R4, [R5, 0x2e]
 
 	ADD SP, SP, 0x8
-	POP {R0-R6,LR}
+	POP {R0-R7,LR}
 	B.W text_layout_iterate_line
 
 	db "v5" ; just for identification
