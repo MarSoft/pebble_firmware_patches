@@ -257,11 +257,12 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	MOV R2, 12 ; FIXME
 	STRH R2, [SP, 6] ; size.h
 	LDR R2, [SP, 4] ; size
+	; fill remaining params (corner rounding)
 	MOV R3, 0
 	STR R3, [SP] ; a0
 	BL graphics_fill_rect ; R0: gctx, R1-R2: rect, R3: radius, a0: corn_mask
 
-	ADD SP, SP, 0x4
+	ADD SP, SP, 0x8
 	POP {R0-R6,LR}
 	B.W text_layout_iterate_line
 }
