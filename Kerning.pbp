@@ -12,6 +12,16 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 
 #ver 361
 
+08 b5 03 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
+	proc iterator_next
+}
+08 b5 43 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
+	proc iterator_prev
+}
+70 b5 0e 46 14 46 05 46 {
+	proc text_layout_get_char_advance
+}
+
 ; iterate_line before main loop
 0a f1 38 02 06 92 10 46  f1 68 2a 46 @ ?4
 {
@@ -33,15 +43,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	B.W for_measure_word
 	global for_measure_word_cont
 }
-08 b5 03 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
-	proc iterator_next
-}
-08 b5 43 68 13 b9 03 48  ?4 80 68 98 47 08 bd {
-	proc iterator_prev
-}
-70 b5 0e 46 14 46 05 46 {
-	proc text_layout_get_char_advance
-}
+
 {
 	ALIGN 4
 	global bef_main_loop
