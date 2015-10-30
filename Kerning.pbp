@@ -21,6 +21,9 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 70 b5 0e 46 14 46 05 46 {
 	proc text_layout_get_char_advance
 }
+2d e9 f0 4f 82 46 97 b0 0c 46 16 46 99 46 {
+	proc text_layout_iterate_line
+}
 
 ; iterate_line before main loop
 0a f1 38 02 06 92 10 46  f1 68 2a 46 @ ?4
@@ -42,6 +45,19 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	; was: BL text_layout_get_char_advance(curr char)
 	B.W for_measure_word
 	global for_measure_word_cont
+}
+; text_layout_draw_line_cb
+03 4b bd e8 f0 41 ?4 bd e8 f0 81
+00 bf ?4
+01 4b @ ?4 {
+	; was:
+	;LDR R3, text_layout_render_char_cb
+	; @
+	;B.W text_layout_iterate_line
+	; R0: gctx
+	; R1: linedata
+	; R2: tli
+	B.W my_draw_line_with_bg
 }
 
 {
@@ -208,3 +224,20 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	ret:
 	POP {R2-R3,PC}
 }
+
+{
+	ALIGN 4
+	proc my_draw_line_with_bg
+	; R0: gctx
+	; R1: linedata
+	; R2: tli
+	; R3: render_char_cb
+
+	PUSH {R0-R4,LR}
+
+	; TODO draw bg
+
+	POP {R0-R4,LR}
+	B.W text_layout_iterate_line
+}
+
