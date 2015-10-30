@@ -24,6 +24,9 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 2d e9 f0 4f 82 46 97 b0 0c 46 16 46 99 46 {
 	proc text_layout_iterate_line
 }
+f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
+	proc graphics_fill_rect
+}
 
 ; iterate_line before main loop
 0a f1 38 02 06 92 10 46  f1 68 2a 46 @ ?4
@@ -233,11 +236,33 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	; R2: tli
 	; R3: render_char_cb
 
-	PUSH {R0-R4,LR}
+	PUSH {R0-R6,LR}
+	SUB SP, SP, 0x8 ; reserve space for arg0 of graphics_fill_rect and var0
 
-	; TODO draw bg
+	MOV R5, R0 ; save gctx
+	MOV R6, R1 ; save linedata
+	; save bg color
+	LDR R4, [R0, 0x2e] ; fill color
+	; calculate new color based on text color
+	LDR R1, [R0, 0x2f] ; text color
+	EOR R1, R1, 0b101010
+	STR R1, [R0, 0x2e] ; fill color
 
-	POP {R0-R4,LR}
+	; load position for rect1
+	LDR R1, [R6, 4] ; box_curr_origin
+	LDRH R2, [R6, 0xA] ; max_extent
+	STRH R2, [SP, 4] ; size.w
+	;LDRH R2, ... 
+	;...
+	MOV R2, 12 ; FIXME
+	STRH R2, [SP, 6] ; size.h
+	LDR R2, [SP, 4] ; size
+	MOV R3, 0
+	STR R3, [SP] ; a0
+	BL graphics_fill_rect ; R0: gctx, R1-R2: rect, R3: radius, a0: corn_mask
+
+	ADD SP, SP, 0x4
+	POP {R0-R6,LR}
 	B.W text_layout_iterate_line
 }
 
