@@ -10,8 +10,10 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 
 #endif
 
+#ver 361
+
 ; iterate_line before main loop
-0a f1 34 02 06 92 10 46  f1 68 2a 46 @ ?4
+0a f1 38 02 06 92 10 46  f1 68 2a 46 @ ?4
 {
 	; was: BL text_layout_get_char_advance(first char)
 	; can use R3
@@ -26,7 +28,7 @@ Possible problem: added '-' in wrapped word between kernable letters will be shi
 	global in_main_loop_cont
 }
 ; text_layout_measure_word in measuring loop
-07 f1 34 00 d9 f8 0c 10  0b 9a 26 89 @ ?4 {
+07 f1 38 00 d9 f8 0c 10  0b 9a 26 89 @ ?4 {
 	; was: BL text_layout_get_char_advance(curr char)
 	B.W for_measure_word
 	global for_measure_word_cont
