@@ -244,9 +244,8 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	LDR R7, [R2, 0xC] ; save font from tli
 	; save bg color
 	LDR R4, [R5, 0x2e] ; fill color
-	; calculate new color based on text color
-	LDR R1, [R5, 0x2f] ; text color
-	EOR R1, R1, 0b101010
+	; calculate new color based on original bg color
+	EOR R1, R4, 0b010101
 	STR R1, [R5, 0x2e] ; fill color
 
 	; load position for rect1
