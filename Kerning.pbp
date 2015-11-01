@@ -230,6 +230,49 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 
 {
 	ALIGN 4
+	proc is_sys_font
+	; R0: font
+	PUSH {R1,R2}
+	LDR R1, start1
+	CMP R0, R1
+	BLT nonsys
+	ADD R1, 0x50 ; 2pcs
+	CMP R0, R1
+	BLT sys
+	LDR R1, start2
+	CMP R0, R1
+	BLT nonsys
+	ADD R1, 0xA0 ; 4pcs
+	CMP R0, R1
+	BLT sys
+	LDR R1, start3
+	CMP R0, R1
+	BLT nonsys
+	ADD R1, 0x50 ; 2pcs
+	CMP R0, R1
+	BLT sys
+
+	nonsys:
+	MOV R0, 0
+	B ret
+	
+	sys:
+	MOV R0, 1
+
+	ret:
+	POP {R1,R2}
+	BX LR
+	ALIGN 4
+	start1:
+	DCD ${sysfonts}+0x28 ; +1 > 2pcs
+	start2:
+	DCD ${sysfonts}+0xA0 ; +4 > 4pcs
+	start3:
+	DCD ${sysfonts}+0x3E8 ; +25 > 2pcs
+}
+
+{
+	ALIGN 4
 	proc my_draw_line_with_bg
 	; R0: gctx
 	; R1: linedata
