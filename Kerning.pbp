@@ -97,8 +97,9 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	PUSH {R0-R5,LR}
 
 	; is font kernable?
-	;TODO
-	;BNE regular
+	MOV R0, R1
+	BL is_sys_font
+	CBZ R0, regular
 
 	; is R2 char kernable?
 	MOV R0, R2
@@ -232,7 +233,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	ALIGN 4
 	proc is_sys_font
 	; R0: font
-	PUSH {R1,R2}
+	PUSH {R1}
 	LDR R1, start1
 	CMP R0, R1
 	BLT nonsys
@@ -254,13 +255,11 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 
 	nonsys:
 	MOV R0, 0
-	B ret
 	
 	sys:
-	MOV R0, 1
+	; R0 (font) is not null
 
-	ret:
-	POP {R1,R2}
+	POP {R1}
 	BX LR
 	ALIGN 4
 	start1:
