@@ -326,6 +326,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	STRH R2, [SP, 8] ; size.w
 	BL get_rect_struct
 	CBZ R0, bypass_r ; failsafe - dont draw if height doesnt match
+	MOV R7, R0 ; save it, overwriting font info which we dont need anymore
 	LDRB R2, [R0, 1] ; first rect height
 	STRH R2, [SP, 0xA] ; size.h
 
@@ -338,14 +339,18 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	STR R3, [SP] ; a0
 	BL graphics_fill_rect ; R0: gctx, R1-R2: rect, R3: radius, a0: corn_mask
 
+
+	; prepare position for rect2
 	LDRH R1, [SP, 6] ; origin.y
-	LDR R2, [SP, 0xA] ; size.h
-	ADD R2, 1 ; rect1 height + 1 (white line height)
+	LDRB R2, [R7, 1] ; first rect height
+	LDRB R3, [R7, 2] ; divider height
 	ADD R1, R2
+	ADD R1, R3
 	STRH R1, [SP, 6] ; update origin.y
-	LDRB R1, [R7, 2] ; font.lineheight
-	SUB R1, R2 ; remaining lower rect
+
+	LDRB R1, [R7, 3] ; second rect height
 	STRH R1, [SP, 0xA] ; size.h
+
 	; now prepare args for rect2
 	MOV R0, R5 ; gctx
 	LDR R1, [SP, 4] ; origin
