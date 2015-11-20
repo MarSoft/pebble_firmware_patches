@@ -298,8 +298,6 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	B bypass
 	goodfont:
 
-	MOV R0, R5 ; gctx
-
 	; save bg color
 	LDRB R4, [R5, 0x2e] ; fill color
 	; calculate new color based on original bg color
@@ -323,33 +321,19 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	nosave2:
 	STRH R1, [SP, 6]
 
-	LDR R1, [SP, 4] ; origin
-
 	; and size for rect1
 	LDRH R2, [R6, 0xA] ; max_extent
 	STRH R2, [SP, 8] ; size.w
-	LDRB R2, [R7, 2] ; font.lineheight
-	CMP R2, 14
-	BEQ rect1_13
-	CMP R2, 18
-	BEQ rect1_13
-	CMP R2, 24
-	BEQ rect1_23
-	CMP R2, 28
-	BEQ rect1_26
-	B bypass_r ; failsafe - don't draw if height doesn't match
-	rect1_13:
-	MOV R2, 8
-	B rect1_done
-	rect1_23:
-	MOV R2, 15
-	B rect1_done
-	rect1_26:
-	MOV R2, 16 ; 17?
-	rect1_done:
+	BL get_rect_struct
+	CBZ R0, bypass_r ; failsafe - dont draw if height doesnt match
+	LDRB R2, [R0, 1] ; first rect height
 	STRH R2, [SP, 0xA] ; size.h
+
+	; prepare args...
+	MOV R0, R5 ; gctx
+	LDR R1, [SP, 4] ; origin
 	LDR R2, [SP, 8] ; size
-	; fill remaining params (corner rounding)
+	; and fill remaining params (corner rounding)
 	MOV R3, 0
 	STR R3, [SP] ; a0
 	BL graphics_fill_rect ; R0: gctx, R1-R2: rect, R3: radius, a0: corn_mask
@@ -379,6 +363,52 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	ADD SP, SP, 0xC
 	POP {R0-R7,LR}
 	B.W text_layout_iterate_line
+}
+{
+	proc get_rect_struct
+	; R7: font
+	; returns: R0: struct ptr or 0
+	PUSH {R1-R3}
+	LDRB R3, [R7, 2] ; font.lineheight
+	ADR R0, sizes
+	MOV R1, 0
+
+	loop:
+	LDRB R2, [R0, R1]
+	CMP R2, R3
+	BEQ ret
+	ADD R1, 4
+	CMP R1, 16
+	BNE loop
+	; else, if last struct didn't match, return 0
+	MOV R0, 0
+	MOV R1, 0
+	ret:
+	ADD R0, R1
+	POP {R1-R3}
+	BX LR
+
+	ALIGN 4
+	sizes:
+	DCB 14 ; font size
+	DCB 9 ; first rect height
+	DCB 1 ; white line height
+	DCB 4 ; second rect height
+
+	DCB 18 ; font size
+	DCB 13 ; first rect height
+	DCB 1 ; white line height
+	DCB 4 ; second rect height
+
+	DCB 24 ; font size
+	DCB 16 ; first rect height
+	DCB 1 ; white line height
+	DCB 7 ; second rect height
+
+	DCB 28 ; font size
+	DCB 18 ; first rect height
+	DCB 2 ; white line height
+	DCB 8 ; second rect height
 
 	db "v5" ; just for identification
 }
