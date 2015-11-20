@@ -359,8 +359,6 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; a0 is already 0
 	BL graphics_fill_rect
 	
-
-	bypass_r:
 	; restore fill color
 	STRB R4, [R5, 0x2e]
 
