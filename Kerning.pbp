@@ -28,6 +28,11 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	proc graphics_fill_rect
 }
 
+; get_sys_font_do, data block - after error hashcode
+75 34 80 C8 @ ?4 {
+	val sysfonts
+}
+
 ; iterate_line before main loop
 0a f1 38 02 06 92 10 46  f1 68 2a 46 @ ?4
 {
@@ -263,11 +268,11 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	BX LR
 	ALIGN 4
 	start1:
-	DCD ${sysfonts}+0x28 ; +1 > 2pcs
+	DCD sysfonts+0x28 ; +1 > 2pcs
 	start2:
-	DCD ${sysfonts}+0xA0 ; +4 > 4pcs
+	DCD sysfonts+0xA0 ; +4 > 4pcs
 	start3:
-	DCD ${sysfonts}+0x3E8 ; +25 > 2pcs
+	DCD sysfonts+0x3E8 ; +25 > 2pcs
 }
 
 {
