@@ -288,6 +288,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 
 	MOV R5, R0 ; save gctx
 	MOV R6, R1 ; save linedata
+	LDR R7, [R2, 0xC] ; save font from tli
 	; save bg color
 	LDRB R4, [R5, 0x2e] ; fill color
 	; calculate new color based on original bg color
@@ -316,7 +317,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; and size for rect1
 	LDRH R2, [R6, 0xA] ; max_extent
 	STRH R2, [SP, 4] ; size.w
-	LDRH R2, [R6, 8] ; linedata.lineheight
+	LDRB R2, [R7, 2] ; font.lineheight
 	STRH R2, [SP, 6] ; size.h
 	LDR R2, [SP, 4] ; size
 	; fill remaining params (corner rounding)
