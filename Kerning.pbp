@@ -294,7 +294,9 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; check font
 	MOV R0, R7
 	BL is_sys_font
-	CBZ R0, bypass
+	CBNZ R0, goodfont
+	B bypass
+	goodfont:
 
 	MOV R0, R5 ; gctx
 
