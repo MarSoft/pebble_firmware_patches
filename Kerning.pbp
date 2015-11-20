@@ -238,6 +238,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	ALIGN 4
 	proc is_sys_font
 	; R0: font
+	; Returns 1 if given font is one of eight Gothic system fonts.
 	PUSH {R1}
 	LDR R1, start1
 	CMP R0, R1
