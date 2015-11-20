@@ -289,6 +289,12 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	MOV R5, R0 ; save gctx
 	MOV R6, R1 ; save linedata
 	LDR R7, [R2, 0xC] ; save font from tli
+
+	; check font
+	MOV R0, R7
+	BL is_sys_font
+	CBZ R0, bypass
+
 	; save bg color
 	LDRB R4, [R5, 0x2e] ; fill color
 	; calculate new color based on original bg color
@@ -328,6 +334,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; restore fill color
 	STRB R4, [R5, 0x2e]
 
+	bypass:
 	ADD SP, SP, 0x8
 	POP {R0-R7,LR}
 	B.W text_layout_iterate_line
