@@ -297,6 +297,9 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	CBNZ R0, goodfont
 	B bypass
 	goodfont:
+	BL get_rect_struct
+	CBZ R0, bypass ; failsafe - dont draw if height doesnt match
+	MOV R7, R0 ; save it, overwriting font info which we dont need anymore
 
 	; save bg color
 	LDRB R4, [R5, 0x2e] ; fill color
@@ -324,10 +327,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; and size for rect1
 	LDRH R2, [R6, 0xA] ; max_extent
 	STRH R2, [SP, 8] ; size.w
-	BL get_rect_struct
-	CBZ R0, bypass_r ; failsafe - dont draw if height doesnt match
-	MOV R7, R0 ; save it, overwriting font info which we dont need anymore
-	LDRB R2, [R0, 1] ; first rect height
+	LDRB R2, [R7, 1] ; first rect height
 	STRH R2, [SP, 0xA] ; size.h
 
 	; prepare args...
