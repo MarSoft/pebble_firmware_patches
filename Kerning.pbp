@@ -302,9 +302,15 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	MOV R7, R0 ; save it, overwriting font info which we dont need anymore
 
 	; save bg color
-	LDRB R4, [R5, 0x2e] ; fill color
-	; calculate new color based on original bg color
-	EOR R1, R4, 0b010101
+	LDRB R4, [R5, 0x2e] ; fill color - in order to restore it later
+	LDRB R1, [R5, 0x2f] ; text color
+	; calculate new color based on text color
+	EOR R1, R1, 0b101010
+	CMP R1, R4
+	BNE color_good
+	; calculated color is probably equivalent to existing bg color, so twist it a little
+	EOR R1, R1, 0b010101
+	color_good:
 	STRB R1, [R5, 0x2e] ; fill color
 
 	; load position for rect1
