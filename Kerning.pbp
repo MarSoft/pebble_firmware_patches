@@ -316,13 +316,13 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; prepare position for rect1
 	LDRH R1, [R6, 4] ; box_curr_origin.x ; FIXME: un-apply offset?
 	LDRH R2, [R5, 0x25] ; gctx.offset.x
-	SUB R1, R1, R2
+	SUB R1, R2
 	STRH R1, [SP, 4]
 
 	LDRH R1, [R6, 6] ; box_curr_origin.y
 	LDRH R2, [R5, 0x27] ; gctx.offset.y
 	LDRB R3, [R7, 2] ; stroke height - for upper offset
-	SUB R1, R1, R2
+	SUB R1, R2
 	ADD R1, R3
 	STRH R1, [SP, 6]
 
