@@ -284,6 +284,8 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; R2: tli
 	; R3: render_char_cb
 
+#define round_radius 4
+
 	PUSH {R0-R7,LR}
 	SUB SP, SP, 0xC ; reserve space for arg0 of graphics_fill_rect and var0 and var1
 
@@ -342,7 +344,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	; and fill remaining params (corner rounding)
 	MOV R3, 3 ; top-left + top-right
 	STR R3, [SP] ; a0
-	MOV R3, 2 ; radius
+	MOV R3, ${round_radius} ; radius
 	BL graphics_fill_rect ; R0: gctx, R1-R2: rect, R3: radius, a0: corn_mask
 
 
@@ -363,7 +365,7 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	LDR R2, [SP, 8] ; size
 	MOV R3, 12 ; bottom-left + bottom-right
 	STR R3, [SP] ; a0
-	MOV R3, 2 ; radius
+	MOV R3, ${round_radius} ; radius
 	BL graphics_fill_rect
 	
 	; restore fill color
