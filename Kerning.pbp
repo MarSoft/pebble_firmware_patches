@@ -298,7 +298,9 @@ f0 b5 8b b0 04 46 04 a8  80 e8 06 00 9d f8 40 60 {
 	B bypass
 	goodfont:
 	BL get_rect_struct
-	CBZ R0, bypass ; failsafe - dont draw if height doesnt match
+	CBNZ R0, nobypass
+	B bypass ; failsafe - dont draw if height doesnt match
+	nobypass:
 	MOV R7, R0 ; save it, overwriting font info which we dont need anymore
 
 	; mangle colors
