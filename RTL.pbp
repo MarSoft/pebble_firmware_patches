@@ -1,0 +1,48 @@
+; Right-to-Left script support
+
+#ifdef __comment
+
+Logic for main loop:
+
+Modes: normal, scanning, printing, skipping
+
+scanning = 0
+skipping = 0
+
+iter = mkiter
+curr_char = iter.currchar
+curr_char_adv = advance(curr_char)
+adv_till_now = 0
+
+# loop start
+while 1:
+    next_full_adv = adv_till_now + curr_char_adv
+    if next_full_adv > max_adv:
+        break
+    calculate points
+    print()
+    iter.next()
+    if iter.ended:
+        adv_till_now = next_full_adv
+        break
+    if iter.currchar == '\n':
+        ...
+        adv_till_now = next_full_adv
+        break
+    curr_char_adv = advance(curr_char)
+    adv_till_now = next_full_adv
+
+
+
+#endif
+
+
+{
+	proc is_rtl_char
+	; R0: charcode
+	; returns: R0=1 if RTL char
+
+	; TODO
+
+	BX LR
+}
