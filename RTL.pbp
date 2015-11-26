@@ -4,45 +4,77 @@
 
 Logic for main loop:
 
-Modes: normal, scanning, printing, skipping
+Modes:
+    normal - moving right, printing         -> scanning
+    scanning - moving right, not printing   -> printing
+    printing - moving left, printing        -> skipping
+    skipping - moving right, not printing   -> normal
 
 scanning = 0
-skipping = 0
+    0: normal       >> p
+    1+: scanning    >> .
+    -1-: printing   << p
+    0x80: skipping  >> .
 
 iter = mkiter
 curr_char = iter.currchar
 curr_char_adv = advance(curr_char)
 adv_till_now = 0
-
-# loop start
 while 1:
-    next_full_adv = adv_till_now + curr_char_adv
-    if next_full_adv > max_adv:
-        break
-    calculate points
-    print()
-    iter.next()
-    if iter.ended:
-        adv_till_now = next_full_adv
-        break
-    if iter.currchar == '\n':
-        ...
-        adv_till_now = next_full_adv
-        break
+    if scanning < 0: # printing
+        next_full_adv = adv_till_now - curr_char_adv
+    else:
+        next_full_adv = adv_till_now + curr_char_adv
+        if next_full_adv > max_adv:
+            break
+    if scanning != 0x80 and scanning <= 0:
+        calculate points
+        print()
+    if scanning < 0:
+        iter.prev()
+        scanning ++
+        if scanning == 0:
+            scanning = 0x80
+    else:
+        iter.next()
+        if iter.ended:
+            if scanning > 0 and scanning != 0x80: # scanning
+                scanning = -scanning # -> printing
+                iter.prev()
+                # no need to calc advance again
+                continue
+            adv_till_now = next_full_adv
+            break
+        if iter.currchar == '\n':
+            if scanning > 0 and scanning != 0x80: # scanning
+                scanning = -scanning # -> printing
+                iter.prev()
+                # no need to calc advance again
+                continue
+            ...
+            adv_till_now = next_full_adv
+            break
     curr_char_adv = advance(curr_char)
+    if scanning > 0 and scanning != 0x80:
+        _tmp =
     adv_till_now = next_full_adv
-
+rollback etc
 
 
 #endif
 
 
 {
-	proc is_rtl_char
+	proc is_rtl_starter
 	; R0: charcode
 	; returns: R0=1 if RTL char
 
 	; TODO
 
 	BX LR
+}
+{
+    proc is_rtl_stopper
+    ...
+    BX LR
 }
