@@ -1,0 +1,8 @@
+; Remove russian Ze letter from list of Emoji characters
+#ver 370
+
+; lst_smiley_chars, beginning
+37 04 00 00 0e 26 00 00 1d 26 00 00 {
+	; replace russian Ze (0x0437) with dupe of next char (0x260e, Black telephone)
+	DCD 0x260e
+}
