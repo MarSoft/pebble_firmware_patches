@@ -14,7 +14,7 @@ scanning = 0
     0: normal       >> p
     1+: scanning    >> .
     -1-: printing   << p
-    0x80: skipping  >> .
+    +0x7F: skipping  >> .
 
 iter = mkiter
 curr_char = iter.currchar
@@ -26,44 +26,182 @@ while 1:
     else:
         next_full_adv = adv_till_now + curr_char_adv
         if next_full_adv > max_adv:
+            if scanning > 0 and scanning != 0x7f:
+                GOTO switch_to_printing
             break
-    if scanning != 0x80 and scanning <= 0:
+    if scanning <= 0:
         calculate points
         print()
     if scanning < 0:
         iter.prev()
         scanning ++
         if scanning == 0:
-            scanning = 0x80
+            scanning = 0x7f
     else:
         iter.next()
         if iter.ended:
-            if scanning > 0 and scanning != 0x80: # scanning
-                scanning = -scanning # -> printing
-                iter.prev()
-                # no need to calc advance again
-                continue
+            if scanning > 0 and scanning != 0x7f: # scanning
+                GOTO switch_to_printing
             adv_till_now = next_full_adv
             break
         if iter.currchar == '\n':
-            if scanning > 0 and scanning != 0x80: # scanning
-                scanning = -scanning # -> printing
-                iter.prev()
-                # no need to calc advance again
-                continue
+            if scanning > 0 and scanning != 0x7f: # scanning
+                GOTO switch_to_printing
             ...
             adv_till_now = next_full_adv
             break
+
+    if scanning == 0 and is_rtl_starter:
+        scanning++
+    if scanning > 0 and scanning != 0x7f and is_rtl_stopper:
+        GOTO switch_to_printing
+    if scanning == 0x7f and is_rtl_stopper:
+        scanning = 0
+
     curr_char_adv = advance(curr_char)
-    if scanning > 0 and scanning != 0x80:
-        _tmp =
+    if scanning > 0 and scanning != 0x7f: # scanning
+        _tmp = # ??? FIXME XXX
     adv_till_now = next_full_adv
+    continue
+
+    switch_to_printing:
+    scanning = -scanning
+    iter.prev()
+    continue
 rollback etc
 
 
 #endif
 
 
+{
+    proc mainloop
+    ; before was: stock initialization
+    STR R9, [SP, 0xC] ; instead of next_full_adv_cache
+    MOV R9, 0 ; it will contain our scanning flag
+
+    loop:
+    LDR R2, [SP, 0x14] ; added_char_advance
+    LDR R3, [SP, 0x10] ; max_allowed_width
+
+    CMP R9, 0
+    BLT printing_1 ; if <0
+
+    ; not printing
+    ADD R12, R11, R7
+    ADD R2, R12
+
+    CMP R2, R3
+    BLE p1_cont
+
+    ; should either stop or switch to printing
+    CMP R9, 0
+    BLE break
+    CMP R9, 0x7f
+    BEQ break
+    B switch_to_printing
+
+    printing_1:
+    SUB R12, R11, R7
+    ADD R2, R12
+
+    p1_cont:
+    CMP R9, 0
+    BGT not_print
+
+    ; print
+    LDR R2, [R4, 4] ; linedata.box_origin
+    LDR R0, [R6, 0xC] ; TLI.font
+    LDRH R8, [R4, 4] ; linedata.box_origin.x
+    STR R2, [SP, 0x24] ; charrect.origin
+    STRH R7, [SP, 0x28] ; charrect.size.w
+    BL gfont_get_max_height
+    ADD R3, R11, R8
+    STRH R0, [SP, 0x2A] ; charrect.size.h
+    STRH R3, [SP, 0x24] ; charrect.origin.x
+    LDR R3, [SP, 0x28] ; charrect.size
+    STR R3, [SP, 0] ; a0: rect.size
+    MOV R0, R10 ; gctx?
+    LDR R3, [SP, 0x24] ; R3: charrect.origin
+    STR R5, [SP, 4] ; a1: codepoint
+    MOV R1, R6 ; R1: tli
+    MOV R2, R4 ; R2: linedata
+    LDR R8, [SP, 0xC]
+    BLX R8
+
+    not_print:
+    CMP R9, 0
+    BLT printing_2
+    ; not printing
+    ;iter.next()
+    ADD R0, SP, 0x2C ; pciter
+    LDR R8, [SP, 0x4C] ; currchar
+    BL iterator_next
+    CBZ R0, ended
+    LDR R5, [SP, 0x4C] ; currchar
+    CMP R5, 0xA ; \n
+    BNE not_ended
+    LDR R3, [SP, 0x1C] ; overflow_is_fill
+    CBZ R3, ended
+    MOV R5, ' '
+
+    not_ended:
+    B p2_cont
+
+    ended:
+    CMP R9, 0
+    BLE ended_indeed
+    CMP R9, 0x7F
+    BNE switch_to_printing
+
+    ended_indeed:
+    MOV R11, R12
+    B break
+
+    printing_2:
+    ADD R0, SP, 0x2C ; pciter
+    LDR R8, [SP, 0x4C] ; currchar
+    BL iterator_prev
+    ADD R9, 1
+    CBNZ R9, dont_switch
+    MOV R9, 0x7f
+    dont_switch:
+
+    p2_cont:
+    CMP R9, 0
+    BEQ regular
+    BLT p3_cont
+    ; looking for stopper
+    MOV R0, R5
+    BL is_rtl_stopper
+    CBZ R0, p3_cont
+    CMP R9, 0x7f
+    BNE switch_to_printing
+    MOV R9, 0 ; -> regular
+    B p3_cont
+    regular:
+    MOV R0, R5
+    BL is_rtl_starter
+    CBZ R0, p3_cont
+    MOV R9, 1 ; -> scanning
+
+    p3_cont:
+    LDR R0, [SP, 0x18] ; text_ctx
+    LDR R1, [R6, 0xC] ; TLI.font
+    MOV R2, R5 ; charcode
+    BL text_layout_get_char_advance
+    MOV R7, R0
+    MOV R11, R12
+    B loop
+
+    switch_to_printing:
+    SUB R9, 0, R9
+    iter.prev()
+    B loop
+
+    break:
+    B end_of_loop
+}
 {
 	proc is_rtl_starter
 	; R0: charcode
