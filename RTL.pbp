@@ -207,12 +207,56 @@ rollback etc
 	; R0: charcode
 	; returns: R0=1 if RTL char
 
-	; TODO
+	PUSH {R1}
 
+    MOV R1, 0x202E ; RTL override
+    CMP R0,R1
+    BEQ ret1
+
+    MOV R1, 0x0590 ; start of hebrew
+    CMP R0, R1
+    BLT ret0
+    MOV R1, 0x06FF ; end of arabic
+    CMP R0, R1
+    BLE ret1
+
+    ret0:
+    MOV R0, 0
+    B ret
+    ret1:
+    MOV R0, 1
+    ret:
+    POP {R1}
 	BX LR
 }
 {
     proc is_rtl_stopper
-    ...
+	PUSH {R1}
+
+    MOV R1, 0x202D ; LTR override
+    CMP R0,R1
+    BEQ ret1
+
+    CMP R0, '0'
+    BLT ret0
+    BMP R0, '9'
+    BLE ret1
+    CMP R0, 'A'
+    BLT ret0
+    CMP R0, 'Z'
+    BLE ret1
+    CMP R0, 'a'
+    BLT ret0
+    CMP R0, 'z'
+    BLE ret1
+    ; TODO cyrillic
+
+    ret0:
+    MOV R0, 0
+    B ret
+    ret1:
+    MOV R0, 1
+    ret:
+    POP {R1}
     BX LR
 }
