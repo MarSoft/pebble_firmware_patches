@@ -1,0 +1,50 @@
+; This patch replaces "Long Back press" action
+; from default "Toggle silent mode"
+; to "Toggle airplane mode".
+
+; these 2 procs are referenced from settings_bluetooth_select_click handler
+6f f7 40 00 @
+01 4b 18 78 70 47 00 bf {
+	proc bt_is_airplane_mode
+}
+
+38 b5 10 4c 63 7a 05 46 23 b9 {
+	proc bt_set_airplane_mode
+}
+
+#include includes/vibes_390.pbi
+
+; this is watchface_back_toggle_quietmode proc
+; we want to fully replace it
+10 b5 ?4 09 4b  09 49 80 f0 01 00
+10 f0 ff 04 18 bf 19 46  07 48 ?4
+20 46 ?4 20 46 bd e8 10 40 ?4 ?12 {
+	; what we want to do:
+	; toggle airplane mode,
+	; vibe about that
+	; and optionally show notification window
+
+	PUSH {R4,LR}
+
+	BL bt_is_airplane_mode
+
+	CBZ R0, is_zero
+	MOV R0, 0
+	B end_inversion
+	is_zero:
+	MOV R0, 1
+	end_inversion:
+
+	MOV R4, R0
+	BL bt_set_airplane_mode
+
+	CBZ R4, now_disabled
+	now_enabled:
+	BL vibes_long_pulse
+	B ret
+	now_disabled:
+	BL vibes_double_pulse
+
+	ret:
+	POP {R4,LR}
+}
