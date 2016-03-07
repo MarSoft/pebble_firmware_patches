@@ -1,0 +1,16 @@
+; This patch replaces "Long Back press" action
+; from default "Toggle silent mode"
+; to "Shut Down" (with confirmation)
+
+38 b5 19 48 ?4 04 46 ?4 00 21 {
+	proc create_shutdown_dlg
+}
+
+; this is watchface_back_toggle_quietmode proc
+; we want to fully replace it
+10 b5 ?4 09 4b  09 49 80 f0 01 00
+10 f0 ff 04 18 bf 19 46  07 48 ?4
+20 46 ?4 20 46 bd e8 10 40 ?4 ?12 {
+
+	B.W create_shutdown_dlg
+}
