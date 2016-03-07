@@ -6,11 +6,16 @@
 	proc create_shutdown_dlg
 }
 
+#include includes/vibes_390.pbi
+
 ; this is watchface_back_toggle_quietmode proc
 ; we want to fully replace it
 10 b5 ?4 09 4b  09 49 80 f0 01 00
 10 f0 ff 04 18 bf 19 46  07 48 ?4
-20 46 ?4 20 46 bd e8 10 40 ?4 ?12 {
-
+20 46 ?4 20 46 bd e8 10 40 ?4 ?12
+{
+	PUSH {LR}
+	BL vibes_double_pulse
+	POP {LR}
 	B.W create_shutdown_dlg
 }
