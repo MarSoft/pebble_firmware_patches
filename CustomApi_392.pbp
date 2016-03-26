@@ -109,7 +109,11 @@
 
 	; restore&return
 	SUB SP, SP, 0x18
-	POP {R4, PC}
+	POP {R4,LR}
+	; now perform POP for PUSH from call_custom_proc
+	POP {R2,R3}
+	; and return
+	BX LR
 }
 
 {
