@@ -1,0 +1,59 @@
+; This patch adds custom API support.
+; Custom API reveals some otherwise not available methods
+; to installed apps.
+; NOTE: this may break some poorly written applications!
+; In such case, app creator should be notified about a bug in the app:
+; dict_write_end method should never be called with NULL parameter (usually).
+
+; How is it done:
+;
+; - app calls `dict_write_end` method with NULL value.
+; On stock firmwares, this method accepts only one parameter in R0
+; and returns 0 if this parameter is zero, thus signalling error.
+;
+; But if this patch is installed, then that method call with `0` in R0
+; will be handled specially.
+; It will then accept at least 2 arguments,
+; and second one denotes an API group.
+;
+; Group 0 is special and is used to check whether this patch is installed.
+; A call `dict_write_end(0, 0)` will return 1 (true),
+; meaning that custom APIs are supported.
+;
+; Other groups are documented below.
+
+; dict_write_end method (partial signature)
+48 b1 02 68 22 b1 83 68  23 b1 43 60 98 a1 70 47
+{
+	; was:
+	; CBZ R0, ret
+	; LDR R2, [R0]
+
+	B.W my_dwe
+	global dwe_cont
+
+	; was:
+	; CBZ R2, retR2
+}
+
+{
+	proc my_dwe
+
+	CBZ R0, our_case
+	; not our case -> re-execute overwritten code
+	LDR R2, [R0]
+	B.W dwe_cont
+
+	our_case:
+	CBNZ R1, not_0
+
+	group_0:
+	; just return 1 (true) to signal that we are here
+	MOV R0, 1
+	BX LR
+
+	not_0:
+	; TODO
+
+	BX LR
+}
