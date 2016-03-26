@@ -87,7 +87,7 @@
 
 	; signature didn't match → return special value
 	MOV R0, 0xBEBEBEBE
-	BX LR
+	B ret
 
 	good:
 	; signature matched → load possible arguments and jump
@@ -110,6 +110,8 @@
 	; restore&return
 	SUB SP, SP, 0x18
 	POP {R4,LR}
+
+	ret:
 	; now perform POP for PUSH from call_custom_proc
 	POP {R2,R3}
 	; and return
