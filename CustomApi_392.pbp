@@ -81,7 +81,15 @@
 ; dict_write_end(0, 1, 0x8004000, 0) -> signature will not match.
 {
 	proc group1
+	; ensure that address is even (for signature), then will make it odd
+	TST R2, 1
+	BEQ is_even
+	SUB R2, R2, 1
+	is_even:
 	LDR R0, [R2]
+	; now make sure it is odd which is needed for calling
+	ADD R2, R2, 1
+
 	CMP R0, R3
 	BEQ good
 
