@@ -76,15 +76,17 @@
 ; R2: offset
 ; R3: signature (first 4 bytes)
 ; [SP]: arguments, if any
-; If signature didn't match, returns -1.
+; If signature didn't match, returns 0xBEBEBEBE.
+; This can be used to check if this group is available in certain build:
+; dict_write_end(0, 1, 0x8004000, 0) -> signature will not match.
 {
 	proc group1
 	LDR R0, [R2]
 	CMP R0, R3
 	BEQ good
 
-	; signature didn't match → return -1
-	MOV R0, 0xFFFFFFFF
+	; signature didn't match → return special value
+	MOV R0, 0xBEBEBEBE
 	BX LR
 
 	good:
