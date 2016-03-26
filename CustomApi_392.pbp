@@ -67,9 +67,46 @@
 	B.W group2
 }
 
+; Group 1 is a custom_call sub-api,
+; it allows calling certain functions by its offset and signature.
+; This approach is intended for debugging only,
+; because it is bound to certain firmware&hardware version.
+;
+; R0, R1: (can be used internally)
+; R2: offset
+; R3: signature (first 4 bytes)
+; [SP]: arguments, if any
+; If signature didn't match, returns -1.
 {
 	proc group_1
+	LDR R0, [R2]
+	CMP R0, R3
+	BEQ good
+
+	; signature didn't match → return -1
+	MOV R0, 0xFFFFFFFF
 	BX LR
+
+	; signature matched → load possible arguments and jump
+
+	; first save func address to R4
+	PUSH {R4, LR}
+	MOV R4, R2
+
+	; We cannot know how many arguments we need,
+	; so load all 4 of them to R0..R3
+	LDR R0, [SP, 0x8] ; as [SP, 0] is our saved R4 and [SP, 4] is our LR
+	LDR R1, [SP, 0xC]
+	LDR R2, [SP, 0x10]
+	LDR R3, [SP, 0x14]
+	; shift SP to remaining aruments (if any)
+	ADD SP, 0x18
+	; now call!
+	BLX R4
+
+	; restore&return
+	SUB SP, 0x18
+	POP {R4, PC}
 }
 
 {
