@@ -23,7 +23,7 @@
 ; Other groups are documented below.
 
 ; dict_write_end method (partial signature)
-48 b1 02 68 22 b1 83 68  23 b1 43 60 98 a1 70 47
+48 b1 02 68 22 b1 83 68  23 b1 43 60 98 1a 70 47
 {
 	; was:
 	; CBZ R0, ret
@@ -78,7 +78,7 @@
 ; [SP]: arguments, if any
 ; If signature didn't match, returns -1.
 {
-	proc group_1
+	proc group1
 	LDR R0, [R2]
 	CMP R0, R3
 	BEQ good
@@ -87,6 +87,7 @@
 	MOV R0, 0xFFFFFFFF
 	BX LR
 
+	good:
 	; signature matched → load possible arguments and jump
 
 	; first save func address to R4
@@ -100,16 +101,16 @@
 	LDR R2, [SP, 0x10]
 	LDR R3, [SP, 0x14]
 	; shift SP to remaining aruments (if any)
-	ADD SP, 0x18
+	ADD SP, SP, 0x18
 	; now call!
 	BLX R4
 
 	; restore&return
-	SUB SP, 0x18
+	SUB SP, SP, 0x18
 	POP {R4, PC}
 }
 
 {
-	proc group_2
+	proc group2
 	BX LR
 }
