@@ -75,7 +75,7 @@
 ; R0, R1: (can be used internally)
 ; R2: offset
 ; R3: signature (first 4 bytes)
-; [SP,0]: pointer to arguments list (actually will point to some stack pos)
+; [SP]: arguments, if any
 ; If signature didn't match, returns 0xBEBEBEBE.
 ; This can be used to check if this group is available in certain build:
 ; dict_write_end(0, 1, 0x8004000, 0) -> signature will not match.
@@ -93,28 +93,23 @@
 	; signature matched → load possible arguments and jump
 
 	; first save func address to R4
-	PUSH {R4,R5,LR}
+	PUSH {R4, LR}
 	MOV R4, R2
 
 	; We cannot know how many arguments we need,
 	; so load all 4 of them to R0..R3
-
-	; save current SP to R5
-	MOV R5, SP
-	; load arguments pos to R0
-	LDR R0, [SP, 12] ; as [SP,{0,4,8}] are busy by push
-	; update SP with this pos - make it point to our args
-	MOV SP, R0
-	; pop first 4 args (if any) to r0-r3
-	; (it will just pop rubbish if none was in stack)
-	POP {R0-R3}
-	
+	LDR R0, [SP, 0x8] ; as [SP, 0] is our saved R4 and [SP, 4] is our LR
+	LDR R1, [SP, 0xC]
+	LDR R2, [SP, 0x10]
+	LDR R3, [SP, 0x14]
+	; shift SP to remaining aruments (if any)
+	ADD SP, SP, 0x18
 	; now call!
 	BLX R4
 
-	; restore stack and return
-	MOV SP, R5
-	POP {R4,R5,PC}
+	; restore&return
+	SUB SP, SP, 0x18
+	POP {R4, PC}
 }
 
 {
