@@ -4,7 +4,9 @@
 // If you want to use this,
 // you'll have to compile with CFLAGS=-Wno-error
 
-void* call_custom_proc(uint32_t addr, uint32_t signature, ...) {
+//void* call_custom_proc(uint32_t addr, uint32_t signature, ...)
+// We use another signature to avoid GCC inserting extra PUSH
+void* call_custom_proc() {
 	__asm(
 		// R0: addr, R1: signature, others: arguments or "keep them safe"
 		"PUSH {R2,R3};"
