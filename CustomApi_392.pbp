@@ -45,15 +45,34 @@
 	B.W dwe_cont
 
 	our_case:
-	CBNZ R1, not_0
+	CBZ R1, group_0
+	CMP R1, 1
+	BEQ group_1
+	CMP R1, 2
+	BEQ group_2
+	; ...
+
+	; nothing matched -> group not supported, return 0 to signal failure
+	MOV R0, 0
+	BX LR
 
 	group_0:
 	; just return 1 (true) to signal that we are here
 	MOV R0, 1
 	BX LR
 
-	not_0:
-	; TODO
+	group_1:
+	B.W group1
+	group_2:
+	B.W group2
+}
 
+{
+	proc group_1
+	BX LR
+}
+
+{
+	proc group_2
 	BX LR
 }
