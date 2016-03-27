@@ -1,0 +1,110 @@
+; This patch allows to selectively disable
+; certain built-in apps.
+#ver 392
+
+; The stock app order is:
+; 1. TicToc
+; 2. Watch only
+; 3. Settings
+; 4. Music
+; 5. Notifications
+; 6. Alarms
+; 7. Watchfaces
+; 8. Quick launch setup
+; 9. Timeline
+; 10. Launcher
+; 11. Shutdown Charging
+; 12. Battery Critical
+; 13. Health
+; 14. Send Text
+; 15. Golf
+; 16. Sports
+
+; Usage:
+; for each app you want to disable, specify corresponding #define option
+; Options:
+;@disable_tictoc
+; Disable TicToc watchface (will cause problems if you have no watchfaces installed)
+;@disable_music
+; Disable Music app
+;@disable_notifications
+; Disable Notifications app
+;@disable_alarms
+; Disable Alarms app
+;@disable_watchfaces
+; Disable Watchfaces app
+
+2d e9 f0 4f 0c 46 8b b0  05 46 00 28 00 f0 a8 80
+{
+	proc find_and_smth
+}
+
+; This is in enumerate_sys_apps proc.
+; It loops over an array of system application data structs
+; and calls a callback for each of them.
+; We want it to skip some app idents.
+; (ident is the first field of app info, and is negative for sys apps)
+; Struct size is 0x24.
+;
+; There are 4 other funcs which also use that sys apps list,
+; but they only search it for certain ident or uuid,
+; and not enumerate it all.
+00 25 04 46 0D 4B 21 46  E8 58 @ ?4
+18 B1 20 46 31 46 B8 47  50 B1 24 35 B5 F5 10 7F
+F1 D1
+{
+	; Here is loop initialization:
+	;
+	; BL pbl_kernel_malloc
+	; MOV R5, 0
+	; MOV R4, R0
+	; loop:
+	; LDR R3, =lst_system_apps
+	; MOV R1, R4
+	; LDR R0, [R5,R3]
+	; was:
+	; BL find_smth_sysapp_by_ident
+	B.W my_code
+	global cont
+}
+
+{
+	proc my_code
+	; Here R0 is an ident and R1 is some struct.
+	; Original code calls find_smth...
+	; and if it returned TRUE then calls a callback.
+	; So if we want it to ignore some app, we just need to put 0 in R0.
+	;
+	; R2 is unused, so we can occupy it
+	RSB R2, R0, 0
+#ifdef disable_tictoc
+	CMP R2, 69
+	BEQ skip
+#endif
+#ifdef disable_music
+	CMP R0, 3
+	BEQ skip
+#endif
+#ifdef disable_notifications
+	CMP R0, 4
+	BEQ skip
+#endif
+#ifdef disable_alarms
+	CMP R0, 5
+	BEQ skip
+#endif
+#ifdef disable_watchfaces
+	CMP R0, 6
+	BEQ skip
+#endif
+
+	; re-exec proc and continue
+	BL find_and_smth
+	B ret
+
+	skip:
+	MOV R0, 0
+
+	ret:
+	B.W cont
+}
