@@ -102,27 +102,27 @@ F1 D1
 	BEQ skip
 #endif
 #ifdef disable_music
-	CMP R0, 3
+	CMP R2, 3
 	BEQ skip
 #endif
 #ifdef disable_notifications
-	CMP R0, 4
+	CMP R2, 4
 	BEQ skip
 #endif
 #ifdef disable_alarms
-	CMP R0, 5
+	CMP R2, 5
 	BEQ skip
 #endif
 #ifdef disable_watchfaces
-	CMP R0, 6
+	CMP R2, 6
 	BEQ skip
 #endif
 #ifdef disable_health
-	CMP R0, 82
+	CMP R2, 82
 	BEQ skip
 #endif
 #ifdef disable_sendtext
-	CMP R0, 83
+	CMP R2, 83
 	BEQ skip
 #endif
 
