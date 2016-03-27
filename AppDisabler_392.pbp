@@ -33,13 +33,21 @@
 ; Disable Alarms app
 ;@disable_watchfaces
 ; Disable Watchfaces app
+;@disable_health
+; Disable Health app
+;@disable_sendtext
+; Disable Send Text app
 
 #ifndef disable_tictoc
 #ifndef disable_music
 #ifndef disable_notifications
 #ifndef disable_alarms
 #ifndef disable_watchfaces
+#ifndef disable_health
+#ifndef disable_sendtext
 #error Please choose at least one app to disable!
+#endif
+#endif
 #endif
 #endif
 #endif
@@ -107,6 +115,14 @@ F1 D1
 #endif
 #ifdef disable_watchfaces
 	CMP R0, 6
+	BEQ skip
+#endif
+#ifdef disable_health
+	CMP R0, 82
+	BEQ skip
+#endif
+#ifdef disable_sendtext
+	CMP R0, 83
 	BEQ skip
 #endif
 
