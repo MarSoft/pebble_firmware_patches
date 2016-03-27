@@ -34,6 +34,18 @@
 ;@disable_watchfaces
 ; Disable Watchfaces app
 
+#ifndef disable_tictoc
+#ifndef disable_music
+#ifndef disable_notifications
+#ifndef disable_alarms
+#ifndef disable_watchfaces
+#error Please choose at least one app to disable!
+#endif
+#endif
+#endif
+#endif
+#endif
+
 2d e9 f0 4f 0c 46 8b b0  05 46 00 28 00 f0 a8 80
 {
 	proc find_and_smth
