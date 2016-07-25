@@ -4,7 +4,8 @@
 ;
 ; There are 2 variants: either consider all names as "one-word"
 ; or consider them as "phone numbers".
-; For now only first one is implemented.
+; Second variant is unstable and causes strange behaviour,
+; so it is disabled by default.
 ;
 ; There is a catch: buffer size is limited with 32 bytes;
 ; as a result, if name is longer than that then it will be cut.
@@ -32,6 +33,21 @@
 
 #else
 
-; TODO
+; this is in call_window_update proc, when we consider which method to use
+00 2d 79 d0 28 46 ?4
+3c 4c 21 68 @ 60 b1 {
+	; was:
+	; CMP R5, 0
+	; BEQ ret
+	; MOV R0, R5
+	; BL is_valid_phone_number
+	; LDR R4, =call_window_data
+	; LDR R1, [R4]
+	;@here-we-go
+	; CBZ R0, format_as_name
+	; (do format as phone number)
+
+	NOP
+}
 
 #endif
