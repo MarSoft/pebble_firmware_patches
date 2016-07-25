@@ -1,0 +1,37 @@
+; This patch reverts Pebble's behaviour
+; to abbreviate all words but the first
+; in calling person's name.
+;
+; There are 2 variants: either consider all names as "one-word"
+; or consider them as "phone numbers".
+; For now only first one is implemented.
+;
+; There is a catch: buffer size is limited with 32 bytes;
+; as a result, if name is longer than that then it will be cut.
+; And if you use multi-byte characters (Cyrillic, Hebrew, Greek...)
+; then you may get a half-char as a result.
+
+#ifndef names_as_phone_numbers
+
+; this is a caller_window_format_name func
+2d e9 f8 43 0c 46 20 21  81 46 17 46 ?4
+06 46 @ 48 b9 {
+	; was:
+	; PUSH {R3-R9,LR}
+	; MOV R4, R1
+	; MOVS R1, ' '
+	; MOV R9, R0
+	; MOV R7, R2
+	; BL strchr
+	; MOV R6, R0
+	;@here-we-go
+	; CBNZ R0, do_the_black_deed
+
+	NOP
+}
+
+#else
+
+; TODO
+
+#endif
